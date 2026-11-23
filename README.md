@@ -23,6 +23,8 @@ Built by **Erdal Kilic** with AI assistance for implementation, tests and docume
 
 **Release evidence:** open the [release scorecard](docs/release-scorecard.md) or [reproduce the recorded results offline](docs/reproduce-evidence.md).
 
+**Benchmark platform:** [run, resume, replay, and compare sealed captures](docs/benchmark-platform.md).
+
 **Independent evaluation:** use the [reviewer kit](docs/reviewer-kit/README.md) to author, seal, and grade blind incidents.
 
 ## Reviewer journey — five minutes

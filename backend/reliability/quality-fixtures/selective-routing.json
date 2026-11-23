@@ -1,0 +1,304 @@
+[
+  {
+    "incident": "counterfactual-confirmed",
+    "model": "gpt-6-luna",
+    "prompt": "selective-citations",
+    "original_diagnosis": {
+      "cause": "worker_stopped",
+      "explanation": "The current workload signal shows no consumer heartbeat or job starts, and the current configuration reports an effective worker count of zero. Together these support a stopped or disabled fulfillment worker as the cause of accepted work waiting. The queue and health tools returned no records, so they do not provide additional corroboration.",
+      "evidence_ids": [
+        "n-5",
+        "n-3"
+      ],
+      "alternative": "The deployment note about a worker stop is from the previous day and does not establish a separate current cause. No current evidence supports database latency or a dependency misconfiguration.",
+      "next_check": "Confirm the current worker state against parcel queue depth and order statuses.",
+      "claims": [
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-5",
+          "quote": "No consumer heartbeat or job start occurred for accepted parcels."
+        },
+        {
+          "kind": "configuration",
+          "evidence_id": "n-3",
+          "quote": "Current effective worker count is zero."
+        }
+      ]
+    },
+    "citation_review": "skipped",
+    "original_verdict": {
+      "cause_correct": true,
+      "passed": true,
+      "claims": [
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-5",
+          "quote": "No consumer heartbeat or job start occurred for accepted parcels.",
+          "verdict": "supports"
+        },
+        {
+          "kind": "configuration",
+          "evidence_id": "n-3",
+          "quote": "Current effective worker count is zero.",
+          "verdict": "supports"
+        }
+      ]
+    },
+    "trace": [
+      {
+        "type": "tool",
+        "name": "read_logs",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": [
+            {
+              "evidence_id": "n-5",
+              "detail": "No consumer heartbeat or job start occurred for accepted parcels.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-5",
+                "signal": "no_worker_activity"
+              }
+            }
+          ]
+        },
+        "elapsed_ms": 857
+      },
+      {
+        "type": "tool",
+        "name": "read_deployments",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": [
+            {
+              "evidence_id": "n-3",
+              "detail": "Current effective worker count is zero.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-3",
+                "signal": "worker_disabled"
+              }
+            },
+            {
+              "evidence_id": "n-9",
+              "detail": "Yesterday's draft deployment note mentions a worker stop.",
+              "context": {
+                "timestamp": "2026-06-07T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-9"
+              }
+            }
+          ]
+        },
+        "elapsed_ms": 1837
+      },
+      {
+        "type": "tool",
+        "name": "read_queue",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": []
+        },
+        "elapsed_ms": 3185
+      },
+      {
+        "type": "tool",
+        "name": "read_health",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": []
+        },
+        "elapsed_ms": 4283
+      }
+    ]
+  },
+  {
+    "incident": "overlapping-faults",
+    "model": "gpt-6-luna",
+    "prompt": "selective-citations",
+    "original_diagnosis": {
+      "cause": "unknown",
+      "explanation": "The parcel workload shows both no worker activity and a substantial SQL lock wait, while configuration shows both an effective worker count of zero and a migration holding the lookup-table lock. The observations do not establish which mechanism caused the delayed batch: current timing cannot order the lock and inactivity, and the effective ordering of the changes is unavailable. Queue and health tools returned no records, so they provide no further corroboration.",
+      "evidence_ids": [
+        "n-5",
+        "n-8",
+        "n-12",
+        "n-3",
+        "n-7",
+        "n-13"
+      ],
+      "alternative": "Either the stopped worker left parcels unprocessed or SQL lock contention delayed processing; both may also have contributed.",
+      "next_check": "Obtain time-ordered worker and database telemetry plus the effective change ordering for the incident window, and inspect current queue and health signals.",
+      "claims": [
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-5",
+          "quote": "No consumer heartbeat or job start occurred for accepted parcels."
+        },
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-8",
+          "quote": "Current request traces spent 980 milliseconds in the SQL lock wait."
+        },
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-12",
+          "quote": "Current timing cannot establish whether SQL locking or worker inactivity preceded the backlog."
+        },
+        {
+          "kind": "configuration",
+          "evidence_id": "n-3",
+          "quote": "Current effective worker count is zero."
+        }
+      ]
+    },
+    "citation_review": "skipped",
+    "original_verdict": {
+      "cause_correct": true,
+      "passed": false,
+      "claims": [
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-5",
+          "quote": "No consumer heartbeat or job start occurred for accepted parcels.",
+          "verdict": "irrelevant"
+        },
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-8",
+          "quote": "Current request traces spent 980 milliseconds in the SQL lock wait.",
+          "verdict": "irrelevant"
+        },
+        {
+          "kind": "mechanism",
+          "evidence_id": "n-12",
+          "quote": "Current timing cannot establish whether SQL locking or worker inactivity preceded the backlog.",
+          "verdict": "supports"
+        },
+        {
+          "kind": "configuration",
+          "evidence_id": "n-3",
+          "quote": "Current effective worker count is zero.",
+          "verdict": "irrelevant"
+        }
+      ]
+    },
+    "trace": [
+      {
+        "type": "tool",
+        "name": "read_logs",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": [
+            {
+              "evidence_id": "n-5",
+              "detail": "No consumer heartbeat or job start occurred for accepted parcels.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-5",
+                "signal": "no_worker_activity"
+              }
+            },
+            {
+              "evidence_id": "n-8",
+              "detail": "Current request traces spent 980 milliseconds in the SQL lock wait.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-8",
+                "signal": "db_wait"
+              }
+            },
+            {
+              "evidence_id": "n-12",
+              "detail": "Current timing cannot establish whether SQL locking or worker inactivity preceded the backlog.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-12"
+              }
+            }
+          ]
+        },
+        "elapsed_ms": 1072
+      },
+      {
+        "type": "tool",
+        "name": "read_deployments",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": [
+            {
+              "evidence_id": "n-3",
+              "detail": "Current effective worker count is zero.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-3",
+                "signal": "worker_disabled"
+              }
+            },
+            {
+              "evidence_id": "n-7",
+              "detail": "The current migration holds the lock on the lookup table.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-7",
+                "signal": "db_setting"
+              }
+            },
+            {
+              "evidence_id": "n-13",
+              "detail": "Both changes overlap and effective ordering is unavailable.",
+              "context": {
+                "timestamp": "2026-06-08T09:12:00Z",
+                "service": "parcel",
+                "environment": "lab",
+                "source": "n-13"
+              }
+            }
+          ]
+        },
+        "elapsed_ms": 2234
+      },
+      {
+        "type": "tool",
+        "name": "read_queue",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": []
+        },
+        "elapsed_ms": 3209
+      },
+      {
+        "type": "tool",
+        "name": "read_health",
+        "arguments": "{}",
+        "ok": true,
+        "result": {
+          "records": []
+        },
+        "elapsed_ms": 4022
+      }
+    ]
+  }
+]

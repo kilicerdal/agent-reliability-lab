@@ -294,7 +294,9 @@ test("paired citations and the grading exercise replay recorded evidence", async
   await page.goto("/#paired-citations", { waitUntil: "networkidle" });
   const section = page.locator("#paired-citations");
   await expect(section.getByRole("table").locator("tbody tr")).toHaveCount(6);
-  await section.getByLabel("Recorded trial").selectOption({ index: 1 });
+  await section
+    .getByLabel("Recorded trial", { exact: true })
+    .selectOption({ index: 1 });
   await expect(
     section.getByRole("heading", { name: "Before review · Supported" }),
   ).toBeVisible();
@@ -304,6 +306,34 @@ test("paired citations and the grading exercise replay recorded evidence", async
   await section.locator('a[href^="#paired-source-"]').first().click();
   await expect(page).toHaveURL(/#paired-source-/);
   await section.getByRole("button", { name: "Insufficient support" }).click();
-  await expect(section.getByRole("status")).toContainText("Correct");
+  await expect(
+    section.getByRole("status").filter({ hasText: "Correct" }),
+  ).toBeVisible();
   expect(unexpected).toEqual([]);
+});
+
+test("the static workbench filters and exports a two-trial comparison", async ({
+  page,
+}) => {
+  await page.goto("/#trial-workbench");
+  const workbench = page.locator("#trial-workbench");
+  await workbench.getByLabel("Filter by cause").selectOption("healthy");
+  await workbench
+    .getByLabel("Filter by tool condition")
+    .selectOption("timeout");
+  await expect(workbench.getByRole("status")).toHaveText("2 matching trials");
+  const downloadPromise = page.waitForEvent("download");
+  await workbench
+    .getByRole("button", { name: "Export trial comparison" })
+    .click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("citation-trial-comparison.json");
+  const stream = await download.createReadStream();
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  const { trials } = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  expect(trials).toHaveLength(2);
+  expect(
+    trials.every((trial: { cause: string }) => trial.cause === "healthy"),
+  ).toBe(true);
 });

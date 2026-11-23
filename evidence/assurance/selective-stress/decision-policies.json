@@ -1,0 +1,403 @@
+{
+  "mode": "recorded_policy_replay",
+  "policies": {
+    "rules_on_luna_observations": {
+      "runs": 8,
+      "correct_cause": 8,
+      "citation_supported": null,
+      "abstained": 2,
+      "escalated": 0,
+      "estimated_median_ms": null,
+      "estimated_p95_ms": null,
+      "estimated_usd": null,
+      "estimated_usd_per_supported": null
+    },
+    "luna": {
+      "runs": 8,
+      "correct_cause": 8,
+      "citation_supported": 7,
+      "abstained": 2,
+      "escalated": 0,
+      "estimated_median_ms": 7442.5,
+      "estimated_p95_ms": 9246,
+      "estimated_usd": 0.005391,
+      "estimated_usd_per_supported": 0.00077
+    },
+    "sol": {
+      "runs": 8,
+      "correct_cause": 8,
+      "citation_supported": 8,
+      "abstained": 2,
+      "escalated": 0,
+      "estimated_median_ms": 8950.5,
+      "estimated_p95_ms": 10454,
+      "estimated_usd": 0.101298,
+      "estimated_usd_per_supported": 0.012662
+    },
+    "luna_then_sol": {
+      "runs": 8,
+      "correct_cause": 8,
+      "citation_supported": 8,
+      "abstained": 2,
+      "escalated": 4,
+      "estimated_median_ms": 12332.5,
+      "estimated_p95_ms": 18124,
+      "estimated_usd": 0.061941,
+      "estimated_usd_per_supported": 0.007743
+    }
+  },
+  "trials": [
+    {
+      "incident": "compound-deploy-feed",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 6432,
+      "estimated_usd": 0.00066
+    },
+    {
+      "incident": "compound-deploy-feed",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 8987,
+      "estimated_usd": 0.014314
+    },
+    {
+      "incident": "compound-deploy-feed",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": true,
+      "estimated_ms": 15419,
+      "estimated_usd": 0.014974
+    },
+    {
+      "incident": "compound-deploy-feed",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "counterfactual-confirmed",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 8827,
+      "estimated_usd": 0.00067
+    },
+    {
+      "incident": "counterfactual-confirmed",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 9040,
+      "estimated_usd": 0.011564
+    },
+    {
+      "incident": "counterfactual-confirmed",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 8827,
+      "estimated_usd": 0.00067
+    },
+    {
+      "incident": "counterfactual-confirmed",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "counterfactual-unresolved",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": true,
+      "escalated": false,
+      "estimated_ms": 7215,
+      "estimated_usd": 0.00071
+    },
+    {
+      "incident": "counterfactual-unresolved",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": true,
+      "escalated": false,
+      "estimated_ms": 10254,
+      "estimated_usd": 0.014408
+    },
+    {
+      "incident": "counterfactual-unresolved",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": true,
+      "escalated": true,
+      "estimated_ms": 17469,
+      "estimated_usd": 0.015118
+    },
+    {
+      "incident": "counterfactual-unresolved",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": true,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "empty-with-stale-worker",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 8122,
+      "estimated_usd": 0.000642
+    },
+    {
+      "incident": "empty-with-stale-worker",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 7777,
+      "estimated_usd": 0.01121
+    },
+    {
+      "incident": "empty-with-stale-worker",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": true,
+      "estimated_ms": 15899,
+      "estimated_usd": 0.011852
+    },
+    {
+      "incident": "empty-with-stale-worker",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "malformed-fallback",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 9246,
+      "estimated_usd": 0.000624
+    },
+    {
+      "incident": "malformed-fallback",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 8914,
+      "estimated_usd": 0.013382
+    },
+    {
+      "incident": "malformed-fallback",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 9246,
+      "estimated_usd": 0.000624
+    },
+    {
+      "incident": "malformed-fallback",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "overlapping-faults",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": false,
+      "abstained": true,
+      "escalated": false,
+      "estimated_ms": 7670,
+      "estimated_usd": 0.000822
+    },
+    {
+      "incident": "overlapping-faults",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": true,
+      "escalated": false,
+      "estimated_ms": 10454,
+      "estimated_usd": 0.016618
+    },
+    {
+      "incident": "overlapping-faults",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": true,
+      "escalated": true,
+      "estimated_ms": 18124,
+      "estimated_usd": 0.01744
+    },
+    {
+      "incident": "overlapping-faults",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": true,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "partial-lock",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 5767,
+      "estimated_usd": 0.000589
+    },
+    {
+      "incident": "partial-lock",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 6482,
+      "estimated_usd": 0.008852
+    },
+    {
+      "incident": "partial-lock",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 5767,
+      "estimated_usd": 0.000589
+    },
+    {
+      "incident": "partial-lock",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    },
+    {
+      "incident": "timeout-healthy",
+      "repeat": 1,
+      "policy": "luna",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 6345,
+      "estimated_usd": 0.000674
+    },
+    {
+      "incident": "timeout-healthy",
+      "repeat": 1,
+      "policy": "sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 7487,
+      "estimated_usd": 0.01095
+    },
+    {
+      "incident": "timeout-healthy",
+      "repeat": 1,
+      "policy": "luna_then_sol",
+      "correct_cause": true,
+      "supported": true,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": 6345,
+      "estimated_usd": 0.000674
+    },
+    {
+      "incident": "timeout-healthy",
+      "repeat": 1,
+      "policy": "rules_on_luna_observations",
+      "correct_cause": true,
+      "supported": null,
+      "abstained": false,
+      "escalated": false,
+      "estimated_ms": null,
+      "estimated_usd": null
+    }
+  ]
+}

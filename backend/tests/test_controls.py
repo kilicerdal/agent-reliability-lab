@@ -3,6 +3,7 @@ import pytest
 
 from backend.controls import approval
 from backend.controls.evidence import capture, restart_outcome, state
+from backend.controls.remediation_lab import run_scenario
 from backend.controls.server import CATALOG, REQUEST
 from backend.lab.db import connect
 from backend.lab.sandbox import reproduce, tick
@@ -26,6 +27,15 @@ def test_catalog_has_only_scoped_tools():
 def test_mcp_scope_and_operator_approval(database):
     result = anyio.run(capture)
     assert all(result["checks"].values()), result["checks"]
+
+
+@pytest.mark.parametrize("persistent_fault", [False, True])
+def test_stateful_remediation_matrix(database, persistent_fault):
+    approval.install()
+    result = anyio.run(run_scenario, persistent_fault)
+    assert all(result["checks"].values()), result["checks"]
+    assert result["timeline"][1]["queue_observation"]["queued"] == 1
+    assert result["outcome"]["workload_recovered"] is not persistent_fault
 
 
 def test_approval_rolls_back_mid_execution_and_detects_persistent_incident(
