@@ -1,0 +1,31 @@
+[
+  {
+    "id": "example-01",
+    "alert": "Parcel scans are being accepted but remain pending.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-4",
+          "detail": "From 09:00 to 09:20 UTC, the parcel consumer emitted no heartbeats and started no jobs. Scan requests returned success."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-8",
+          "detail": "Effective parcel consumer replica count was zero from 09:00 to 09:20 UTC."
+        },
+        {
+          "evidence_id": "obs-3",
+          "detail": "Yesterday's rollout note proposed keeping two parcel consumers running."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "obs-6",
+          "detail": "The pending parcel queue grew from 12 to 300 during the window."
+        }
+      ],
+      "read_health": []
+    }
+  }
+]

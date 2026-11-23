@@ -8,6 +8,8 @@ This checks the structured claims and quotations. General factual review of the 
 
 ## Independent benchmark intake
 
+The [independent reviewer kit](reviewer-kit/README.md) supplies copyable templates, a per-claim scoring rubric, a worked weak-citation example, and private sealing and handoff instructions.
+
 An independent reviewer supplies two JSON arrays. The observations file holds cases with `id`, `alert`, and `tools`. Each tool maps to observations with `evidence_id` and `detail`. The answer file holds `id`, `cause`, `reviewer`, and `judgments`. A judgment has `kind` (mechanism or configuration), `evidence_id`, `verdict` (supports, contradicts, or irrelevant), and an exact `required_excerpt` for supportive judgments. One supported claim of each kind is required. For a multi-fault case, the reviewer identifies the primary cause where the evidence supports one and uses `unknown` where it does not.
 
 ```sh

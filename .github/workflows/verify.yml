@@ -53,6 +53,8 @@ jobs:
           python -m uvicorn lab.inventory:app --host 127.0.0.1 --port 8811 > /tmp/inventory.log 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8811/stock && break; sleep 1; done
       - run: ruff check backend && ruff format --check backend
+      - name: Verify the independent reviewer kit offline
+        run: pytest -q docs/reviewer-kit/test_worked_example.py
       - name: Offline and real database tests — no model calls
         run: pytest -q
       - run: npm --prefix dashboard ci

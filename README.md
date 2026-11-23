@@ -21,6 +21,8 @@ Built by **Erdal Kilic** with AI assistance for implementation, tests and docume
 
 **Agent assurance:** inspect the [citation grader, independent benchmark intake, real recovery comparisons, and database-scoped approval](docs/assurance.md).
 
+**Independent evaluation:** use the [reviewer kit](docs/reviewer-kit/README.md) to author, seal, and grade blind incidents.
+
 ## Reviewer journey — five minutes
 
 1. Start the recorded viewer below. No API key is needed to inspect the included captures.

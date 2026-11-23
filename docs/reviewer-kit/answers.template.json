@@ -1,0 +1,51 @@
+[
+  {
+    "id": "example-01",
+    "cause": "worker_stopped",
+    "reviewer": "example-reviewer",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-4",
+        "verdict": "supports",
+        "required_excerpt": "the parcel consumer emitted no heartbeats and started no jobs"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-4",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-8",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-8",
+        "verdict": "supports",
+        "required_excerpt": "Effective parcel consumer replica count was zero"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-6",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-6",
+        "verdict": "irrelevant"
+      }
+    ]
+  }
+]
