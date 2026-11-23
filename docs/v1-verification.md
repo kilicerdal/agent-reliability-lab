@@ -11,7 +11,9 @@
 
 ## Clean-environment verification
 
-The `V1 verification` workflow runs both native service integration and Docker Compose integration. Inspect its actual status and logs before claiming either path passed. Local Docker Engine/Compose was unavailable during development; container verification is performed in GitHub Actions rather than inferred from a configuration file.
+[Clean-environment verification passed](https://github.com/kilicerdal/agent-reliability-lab/actions/runs/45090199177): 23 backend checks in the native job, six desktop/mobile browser executions, and 23 backend checks inside the Docker Compose topology. The workflow built and started the dashboard, results API, synthetic inventory service and PostgreSQL container. No API key was supplied.
+
+Local Docker Engine/Compose was unavailable during development; container execution was verified in GitHub Actions, not inferred from a configuration file.
 
 ## Interpretation
 

@@ -9,6 +9,10 @@
 
 Built by **Erdal Kilic** with AI assistance for implementation, tests and documentation. Personal engineering work; no employer systems, customer records or production incidents.
 
+![Working V1 dashboard showing captured investigations and independent outcomes](docs/assets/overview.png)
+
+[Full desktop capture](docs/assets/dashboard-1440.png) · [Mobile capture](docs/assets/dashboard-390.png)
+
 ## Reviewer journey — five minutes
 
 1. Start the recorded viewer below. No API key is needed to inspect the included captures.
