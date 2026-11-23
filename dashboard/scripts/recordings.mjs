@@ -38,14 +38,55 @@ const trials = (await readFile(join(evidence, "v2/runs.jsonl"), "utf8"))
   .trim()
   .split("\n")
   .map((line) => JSON.parse(line));
-const failure = trials.find(
-  (trial) =>
-    trial.incident === "invoice-window" &&
-    trial.arm === "recovery" &&
-    !trial.strict_pass &&
-    trial.diagnosis,
-);
-if (!failure || !runs.some((run) => run.scenario === "worker-failure")) {
+const arms = ["baseline", "recovery"];
+const incidentIds = [...new Set(trials.map((trial) => trial.incident))];
+const incidents = incidentIds.map((id) => {
+  const rows = trials.filter((trial) => trial.incident === id);
+  const conditions = new Set(rows.map((trial) => trial.failure));
+  const result = { id, condition: rows[0].failure };
+  if (conditions.size !== 1)
+    throw new Error(`Inconsistent tool conditions: ${id}`);
+  for (const arm of arms) {
+    const group = rows.filter((trial) => trial.arm === arm);
+    const repetitions = new Set(group.map((trial) => trial.trial));
+    if (
+      group.length !== comparison.repeats ||
+      repetitions.size !== comparison.repeats ||
+      group.some(
+        (trial) =>
+          !Number.isInteger(trial.trial) ||
+          trial.trial < 1 ||
+          trial.trial > comparison.repeats,
+      )
+    )
+      throw new Error(`Incomplete or duplicate trials: ${id}/${arm}`);
+    result[arm] = {
+      passed: group.filter((trial) => trial.strict_pass).length,
+      total: group.length,
+    };
+  }
+  return result;
+});
+for (const arm of arms) {
+  const metrics = comparison.arms[arm].all;
+  const rows = trials.filter((trial) => trial.arm === arm);
+  if (
+    rows.length !== metrics.runs ||
+    trials.length !== incidentIds.length * arms.length * comparison.repeats ||
+    ["strict_pass", "failure_exposed", "recovered"].some(
+      (key) => rows.filter((row) => row[key]).length !== metrics[key],
+    )
+  ) {
+    throw new Error(`V2 traces disagree with the scorecard: ${arm}`);
+  }
+}
+const failures = trials.filter((trial) => !trial.strict_pass);
+if (
+  !failures.some(
+    (trial) => trial.incident === "invoice-window" && trial.arm === "recovery",
+  ) ||
+  !runs.some((run) => run.scenario === "worker-failure")
+) {
   throw new Error(
     "The showcase requires the recorded worker case and invoice-window failure.",
   );
@@ -55,5 +96,11 @@ const approval = JSON.parse(
 );
 await writeFile(
   resolve("app/showcase/recorded-data.json"),
-  JSON.stringify({ investigations: runs, comparison, failure, approval }),
+  JSON.stringify({
+    investigations: runs,
+    comparison,
+    incidents,
+    failures,
+    approval,
+  }),
 );

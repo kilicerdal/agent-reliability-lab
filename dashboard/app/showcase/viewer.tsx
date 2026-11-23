@@ -40,13 +40,31 @@ export type Comparison = {
   repeats: number;
   arms: Record<"baseline" | "recovery", Record<string, Counts>>;
 };
-export type Failure = {
+type Incident = {
+  id: string;
+  condition: string;
+  baseline: { passed: number; total: number };
+  recovery: { passed: number; total: number };
+};
+const conditions: Record<string, string> = {
+  timeout: "Transient timeout",
+  missing: "Unavailable source",
+  conflict: "Stale conflicting record",
+  insufficient: "Insufficient evidence",
+  none: "No injected tool condition",
+};
+const armLabels: Record<string, string> = {
+  baseline: "V1 prompt",
+  recovery: "Recovery prompt",
+};
+const failureKey = (run: Failure) => `${run.incident}/${run.arm}/${run.trial}`;
+type Failure = {
   incident: string;
   arm: string;
   trial: number;
   strict_pass: boolean;
   expected: string;
-  diagnosis: Diagnosis;
+  diagnosis: Diagnosis | null;
   trace: Trace[];
 };
 type WorkerState = {
@@ -191,16 +209,32 @@ function Ratio({
 export default function Showcase({
   investigations,
   comparison,
-  failure,
+  incidents,
+  failures,
   approval,
 }: {
   investigations: Investigation[];
   comparison: Comparison;
-  failure: Failure;
+  incidents: Incident[];
+  failures: Failure[];
   approval: Approval;
 }) {
   const [scenario, setScenario] = useState("worker-failure");
   const [stage, setStage] = useState(0);
+  const [failedTrial, setFailedTrial] = useState(() =>
+    failureKey(
+      failures.find(
+        (trial) =>
+          trial.incident === "invoice-window" && trial.arm === "recovery",
+      )!,
+    ),
+  );
+  const failure = failures.find((trial) => failureKey(trial) === failedTrial)!;
+  const selectedFailureTitle =
+    failure.incident === "invoice-window" &&
+    failure.diagnosis?.cause === "dependency_config"
+      ? "Correct explanation, wrong cause label"
+      : "Why this run failed";
   const run = investigations.find((item) => item.scenario === scenario)!;
   const snapshot = approval.states[stages[stage].key];
   const base = comparison.arms.baseline.all;
@@ -338,9 +372,9 @@ export default function Showcase({
             <p className={styles.kicker}>V2 · Evaluation</p>
             <h2 id="comparison-heading">What recovery guidance changed</h2>
             <p>
-              Eight held-out synthetic incidents, {comparison.repeats} runs per
-              incident and prompt. Both prompts used the same model and replayed
-              tool fixtures.
+              {incidents.length} held-out synthetic incidents,{" "}
+              {comparison.repeats} runs per incident and prompt. Both prompts
+              used the same model and replayed tool fixtures.
             </p>
           </div>
           <div className={styles.compareGrid}>
@@ -373,16 +407,74 @@ export default function Showcase({
               />
             </div>
           </div>
+          <div className={`${styles.panel} ${styles.incidentPanel}`}>
+            <h3>Results by incident</h3>
+            <p>
+              {
+                incidents.filter((i) => i.recovery.passed > i.baseline.passed)
+                  .length
+              }{" "}
+              improved ·{" "}
+              {
+                incidents.filter((i) => i.recovery.passed === i.baseline.passed)
+                  .length
+              }{" "}
+              tied ·{" "}
+              {
+                incidents.filter((i) => i.recovery.passed < i.baseline.passed)
+                  .length
+              }{" "}
+              regressed
+            </p>
+            <table className={styles.incidentTable}>
+              <caption>Correct, grounded diagnoses per prompt</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Incident</th>
+                  <th scope="col">V1 prompt</th>
+                  <th scope="col">Recovery prompt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {incidents.map((incident) => (
+                  <tr key={incident.id}>
+                    <th scope="row">
+                      {incident.id.replaceAll("-", " ")}
+                      <small>
+                        {conditions[incident.condition] || incident.condition}
+                      </small>
+                    </th>
+                    <td>
+                      {incident.baseline.passed}/{incident.baseline.total}
+                    </td>
+                    <td>
+                      {incident.recovery.passed}/{incident.recovery.total}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className={`${styles.panel} ${styles.failurePanel}`}>
             <div className={styles.panelHead}>
               <div>
-                <p className={styles.kicker}>
-                  Invoice window · Recovery prompt · Trial {failure.trial}
-                </p>
-                <h3>Correct explanation, wrong cause label</h3>
+                <label htmlFor="failure-select">Failed trial</label>
+                <select
+                  id="failure-select"
+                  value={failedTrial}
+                  onChange={(event) => setFailedTrial(event.target.value)}
+                >
+                  {failures.map((trial) => (
+                    <option key={failureKey(trial)} value={failureKey(trial)}>
+                      {trial.incident.replaceAll("-", " ")} ·{" "}
+                      {armLabels[trial.arm]} · Trial {trial.trial}
+                    </option>
+                  ))}
+                </select>
               </div>
               <span className={styles.failure}>Failed grading</span>
             </div>
+            <h3>{selectedFailureTitle}</h3>
             <dl className={styles.labels}>
               <div>
                 <dt>Expected cause</dt>
@@ -393,17 +485,21 @@ export default function Showcase({
               <div>
                 <dt>Agent returned</dt>
                 <dd>
-                  <code>{failure.diagnosis.cause}</code>
+                  <code>{failure.diagnosis?.cause ?? "No diagnosis"}</code>
                 </dd>
               </div>
             </dl>
-            <blockquote>{failure.diagnosis.explanation}</blockquote>
-            <p>
-              The structured output failed the exact-cause check even though the
-              explanation identified the SQL delay.
-            </p>
-            <Evidence diagnosis={failure.diagnosis} trace={failure.trace} />
-            <TraceList trace={failure.trace} title="Inspect V2 failure trace" />
+            {failure.diagnosis && (
+              <>
+                <blockquote>{failure.diagnosis.explanation}</blockquote>
+                <Evidence diagnosis={failure.diagnosis} trace={failure.trace} />
+              </>
+            )}
+            <TraceList
+              key={failedTrial}
+              trace={failure.trace}
+              title="Inspect V2 failure trace"
+            />
           </div>
         </section>
         <section
