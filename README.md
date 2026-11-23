@@ -1,6 +1,6 @@
 # Agent Reliability Lab
 
-[![V1 verification](https://github.com/kilicerdal/agent-reliability-lab/actions/workflows/verify.yml/badge.svg)](https://github.com/kilicerdal/agent-reliability-lab/actions/workflows/verify.yml)
+[![Lab verification](https://github.com/kilicerdal/agent-reliability-lab/actions/workflows/verify.yml/badge.svg)](https://github.com/kilicerdal/agent-reliability-lab/actions/workflows/verify.yml)
 ![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-black)
 [![MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
@@ -8,6 +8,8 @@
 **An AI incident investigator with an independent verdict.** Inject a synthetic failure, let the investigator inspect read-only tools, then check its diagnosis against the known cause and actual workload state.
 
 Built by **Erdal Kilic** with AI assistance for implementation, tests and documentation. Personal engineering work; no employer systems, customer records or production incidents.
+
+**V2 evaluation:** A recovery-guided prompt passed **23/24** held-out runs compared with **19/24** for the V1 prompt, using the same model and tool fixtures. [Read the evaluation report](docs/v2-evaluation.md) · [Inspect the scorecard](evidence/v2/summary.json)
 
 ![Working V1 dashboard showing captured investigations and independent outcomes](docs/assets/overview.png)
 
@@ -146,3 +148,10 @@ The browser suite checks desktop and mobile Chromium, keyboard access, WCAG A/AA
 - [V1 verification record](docs/v1-verification.md)
 
 V1 has no autonomous remediation, no public live agent, no multi-agent benchmark, no MCP security certification and no production-readiness claim. Each later capability needs its own measured evidence.
+
+## V2 reliability evaluation
+
+The offline incident fixtures and live comparison runner evaluate the V1 prompt against a recovery-guided prompt. The held-out scorecard records diagnosis accuracy, evidence coverage, handling of tool failures, elapsed time, and estimated API cost.
+
+- [Evaluation protocol and reproduction command](docs/v2-evaluation.md)
+- [Held-out scorecard and per-investigation traces](evidence/v2/)

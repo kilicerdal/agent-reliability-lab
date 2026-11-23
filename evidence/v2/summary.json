@@ -1,0 +1,155 @@
+{
+  "split": "holdout",
+  "repeats": 3,
+  "fixture_sha256": "e3d85d11ec4a520813eaedaac9726ef1b725962abd8937fb84a37636e1950ff6",
+  "arms": {
+    "baseline": {
+      "all": {
+        "runs": 24,
+        "correct_cause": 19,
+        "strict_pass": 19,
+        "failure_exposed": 18,
+        "recovered": 13,
+        "retried_timeout": 6,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.169336,
+        "median_ms": 6117.5
+      },
+      "conflict": {
+        "runs": 6,
+        "correct_cause": 6,
+        "strict_pass": 6,
+        "failure_exposed": 6,
+        "recovered": 6,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.042692,
+        "median_ms": 5944.0
+      },
+      "insufficient": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.026716,
+        "median_ms": 7182
+      },
+      "missing": {
+        "runs": 6,
+        "correct_cause": 4,
+        "strict_pass": 4,
+        "failure_exposed": 6,
+        "recovered": 4,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.041226,
+        "median_ms": 6125.0
+      },
+      "none": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.016696,
+        "median_ms": 5008
+      },
+      "timeout": {
+        "runs": 6,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 6,
+        "recovered": 3,
+        "retried_timeout": 6,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.042006,
+        "median_ms": 6117.5
+      }
+    },
+    "recovery": {
+      "all": {
+        "runs": 24,
+        "correct_cause": 23,
+        "strict_pass": 23,
+        "failure_exposed": 18,
+        "recovered": 17,
+        "retried_timeout": 6,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.193232,
+        "median_ms": 6476.5
+      },
+      "conflict": {
+        "runs": 6,
+        "correct_cause": 6,
+        "strict_pass": 6,
+        "failure_exposed": 6,
+        "recovered": 6,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.045912,
+        "median_ms": 5720.5
+      },
+      "insufficient": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.028766,
+        "median_ms": 7633
+      },
+      "missing": {
+        "runs": 6,
+        "correct_cause": 6,
+        "strict_pass": 6,
+        "failure_exposed": 6,
+        "recovered": 6,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.05566,
+        "median_ms": 7126.0
+      },
+      "none": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.018006,
+        "median_ms": 4843
+      },
+      "timeout": {
+        "runs": 6,
+        "correct_cause": 5,
+        "strict_pass": 5,
+        "failure_exposed": 6,
+        "recovered": 5,
+        "retried_timeout": 6,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.044888,
+        "median_ms": 6070.5
+      }
+    }
+  }
+}
