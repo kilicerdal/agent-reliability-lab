@@ -1,0 +1,237 @@
+{
+  "historical_sol": {
+    "runs": 12,
+    "cause_correct": 12,
+    "supported": 12,
+    "premature_causes": 0,
+    "p95_ms": 11284,
+    "estimated_usd": 0.128686
+  },
+  "arms": {
+    "restart": {
+      "runs": 12,
+      "cause_correct": 12,
+      "supported": 11,
+      "p95_ms": 23000,
+      "estimated_usd": 0.069477,
+      "estimated_fresh_usd": 0.061622,
+      "fresh_tool_reads": 16,
+      "execution_errors": 0,
+      "trials": [
+        {
+          "incident": "billing-lock",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8534,
+          "estimated_usd": 0.000653
+        },
+        {
+          "incident": "packing-fleet",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8092,
+          "estimated_usd": 0.000597
+        },
+        {
+          "incident": "catalog-host",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 7212,
+          "estimated_usd": 0.000612
+        },
+        {
+          "incident": "profile-normal",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8769,
+          "estimated_usd": 0.000592
+        },
+        {
+          "incident": "statement-pool",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 6839,
+          "estimated_usd": 0.000609
+        },
+        {
+          "incident": "quote-retired-path",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 7912,
+          "estimated_usd": 0.000665
+        },
+        {
+          "incident": "notice-config-gap",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 18751,
+          "estimated_usd": 0.014714000000000001
+        },
+        {
+          "incident": "refund-trace-gap",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 16656,
+          "estimated_usd": 0.014624
+        },
+        {
+          "incident": "statement-conflict",
+          "cause_correct": true,
+          "supported": false,
+          "premature": false,
+          "elapsed_ms": 23000,
+          "estimated_usd": 0.017876
+        },
+        {
+          "incident": "manifest-conflict",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 21215,
+          "estimated_usd": 0.017296
+        },
+        {
+          "incident": "watermark-stale",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 7623,
+          "estimated_usd": 0.000589
+        },
+        {
+          "incident": "enrichment-fleet",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8603,
+          "estimated_usd": 0.00065
+        }
+      ]
+    },
+    "handoff": {
+      "runs": 12,
+      "cause_correct": 12,
+      "supported": 10,
+      "p95_ms": 21955,
+      "estimated_usd": 0.085667,
+      "estimated_fresh_usd": 0.077812,
+      "fresh_tool_reads": 13,
+      "execution_errors": 0,
+      "trials": [
+        {
+          "incident": "billing-lock",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8534,
+          "estimated_usd": 0.000653
+        },
+        {
+          "incident": "packing-fleet",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8092,
+          "estimated_usd": 0.000597
+        },
+        {
+          "incident": "catalog-host",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 7212,
+          "estimated_usd": 0.000612
+        },
+        {
+          "incident": "profile-normal",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8769,
+          "estimated_usd": 0.000592
+        },
+        {
+          "incident": "statement-pool",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 6839,
+          "estimated_usd": 0.000609
+        },
+        {
+          "incident": "quote-retired-path",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 7912,
+          "estimated_usd": 0.000665
+        },
+        {
+          "incident": "notice-config-gap",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 18762,
+          "estimated_usd": 0.02074
+        },
+        {
+          "incident": "refund-trace-gap",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 15600,
+          "estimated_usd": 0.016794
+        },
+        {
+          "incident": "statement-conflict",
+          "cause_correct": true,
+          "supported": false,
+          "premature": false,
+          "elapsed_ms": 21955,
+          "estimated_usd": 0.021612
+        },
+        {
+          "incident": "manifest-conflict",
+          "cause_correct": true,
+          "supported": false,
+          "premature": false,
+          "elapsed_ms": 20128,
+          "estimated_usd": 0.021554
+        },
+        {
+          "incident": "watermark-stale",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 7623,
+          "estimated_usd": 0.000589
+        },
+        {
+          "incident": "enrichment-fleet",
+          "cause_correct": true,
+          "supported": true,
+          "premature": false,
+          "elapsed_ms": 8603,
+          "estimated_usd": 0.00065
+        }
+      ],
+      "checks": {
+        "minimum_cohort": true,
+        "cost": true,
+        "p95_latency": false,
+        "preserve_case_accuracy_and_support": false,
+        "no_premature_cause": true,
+        "no_execution_failures": true
+      }
+    }
+  },
+  "eligible": false
+}

@@ -75,3 +75,21 @@ The policy escalated four cases and missed no opportunity to match a supported s
 ```sh
 python -m backend.reliability.live_escalation --replay --output evidence/assurance/live-escalation
 ```
+
+## Evidence handoff follow-up
+
+The two arms reused the same recorded initial Luna investigations and made eight new Sol investigations across the four escalated cases. Sol restarted from the alert in one arm and received Luna's observed records, source metadata, and provisional diagnosis in the other. Arm order alternated by incident, and each Sol investigation had access to the same read-only tool catalogue. The grader key stayed outside the model payload.
+
+| Policy | Cause accuracy | Citation support | p95 | Estimated total policy cost |
+| --- | ---: | ---: | ---: | ---: |
+| Historical standalone Sol | 12/12 | 12/12 | 11.28 s | $0.128686 |
+| Luna plus fresh Sol restart | 12/12 | 11/12 | 23.00 s | $0.069477 |
+| Luna plus fresh Sol handoff | 12/12 | 10/12 | 21.96 s | $0.085667 |
+
+The policy figures include the eight unchanged Luna trials and sum the recorded Luna time and new Sol time for the four escalations. Standalone Sol is the historical reference. Handoff saved 1.045 s at p95 versus the new restart, but Sol still made 13 fresh tool reads versus 16 with restart and used more input tokens. Both arms cited irrelevant evidence in the statement conflict. Handoff also cited irrelevant evidence in the manifest conflict. The handoff missed the frozen support and latency gates. The default remains unchanged. This is a small follow-up on a lab-authored cohort. Fresh calls consumed an estimated $0.139434.
+
+[Manifest, results, and traces](../evidence/assurance/evidence-handoff)
+
+```sh
+python -m backend.reliability.evidence_handoff --replay --output evidence/assurance/evidence-handoff
+```
