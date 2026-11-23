@@ -565,3 +565,28 @@
   display: block;
   scroll-margin-top: 2rem;
 }
+
+.blindCorrection {
+  margin-block: 0.65rem;
+}
+.blindCorrection > summary {
+  cursor: pointer;
+  font-weight: 750;
+  color: var(--green);
+  text-transform: capitalize;
+}
+.blindArm {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.blindArm h4 {
+  margin: 0;
+}
+.blindArm p {
+  overflow-wrap: anywhere;
+}
+.incidentPanel > p a {
+  color: var(--green);
+}

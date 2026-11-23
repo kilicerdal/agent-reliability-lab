@@ -84,6 +84,54 @@ test("V1 investigation, V2 failure, and V3 replay use static evidence", async ({
   });
   await expect(trial).toHaveValue("invoice-window/recovery/3");
 
+  const blind = page.getByRole("region", {
+    name: "Blind evaluation",
+    exact: true,
+  });
+  await expect(
+    blind.getByRole("heading", {
+      name: "47/50 vs. 50/50 correct, grounded diagnoses",
+    }),
+  ).toBeVisible();
+  const blindMatrix = blind.getByRole("table", {
+    name: "Strict passes by expected cause",
+  });
+  await expect(blindMatrix.locator("tbody tr")).toHaveCount(5);
+  for (const [cause, previous, revised] of [
+    ["Database latency", "9/10", "10/10"],
+    ["Worker stopped", "8/10", "10/10"],
+    ["Dependency configuration", "10/10", "10/10"],
+    ["Healthy", "10/10", "10/10"],
+    ["Insufficient evidence", "10/10", "10/10"],
+  ]) {
+    await expect(
+      blindMatrix.getByRole("row").filter({ hasText: cause }).getByRole("cell"),
+    ).toHaveText([previous, revised]);
+  }
+  for (const [incident, cause] of [
+    ["dispatch profile", "worker_stopped"],
+    ["maintenance flag", "worker_stopped"],
+    ["read fence", "db_latency"],
+  ]) {
+    const pair = blind
+      .locator("details")
+      .filter({ has: page.locator("summary").filter({ hasText: incident }) });
+    await pair.locator(":scope > summary").click();
+    const previous = pair.getByRole("region", { name: "Previous prompt" });
+    const revised = pair.getByRole("region", { name: "Revised contract" });
+    await expect(
+      previous.getByText("dependency_config", { exact: true }),
+    ).toBeVisible();
+    await expect(revised.getByText(cause, { exact: true })).toBeVisible();
+    for (const arm of [previous, revised]) {
+      await arm.locator("details > summary").first().click();
+      const event = arm.locator("ol li").first();
+      await event.locator("summary").click();
+      await expect(event.locator("pre")).toContainText('"type": "model"');
+    }
+    await pair.locator(":scope > summary").click();
+  }
+
   const replay = page.locator("#replay-state");
   for (const [stage, state, order] of [
     ["Request pending", "Disabled", "queued"],
@@ -146,15 +194,19 @@ test("the export includes the complete downloadable evidence", async ({
     .evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
     );
-  expect(links).toHaveLength(5);
+  expect(links).toHaveLength(7);
   const responses = await Promise.all(links.map((link) => request.get(link)));
   expect(responses.every((response) => response.ok())).toBe(true);
-  const [v1, scorecard, v2, approval, v3] = await Promise.all(
-    responses.map((response) => response.text()),
-  );
+  const [v1, scorecard, v2, approval, v3, blindScorecard, blindTraces] =
+    await Promise.all(responses.map((response) => response.text()));
   expect(JSON.parse(v1)).toHaveLength(4);
   expect(JSON.parse(scorecard).arms.recovery.all.strict_pass).toBe(23);
   expect(v2.trim().split("\n")).toHaveLength(48);
   expect(JSON.parse(approval).states.after_two_ticks.completion_events).toBe(1);
   expect(v3.trim().split("\n")).toHaveLength(6);
+  expect(JSON.parse(blindScorecard).paired_outcomes).toEqual({
+    both_passed: 47,
+    candidate_only: 3,
+  });
+  expect(blindTraces.trim().split("\n")).toHaveLength(100);
 });

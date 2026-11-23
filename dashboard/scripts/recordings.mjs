@@ -27,6 +27,8 @@ for (const [source, name] of [
   ["v2/runs.jsonl", "v2-traces.jsonl"],
   ["v3/boundaries.json", "v3-approval.json"],
   ["v3/prompt-trials.jsonl", "v3-prompt-trials.jsonl"],
+  ["cause-contract-blind/paired.json", "blind-scorecard.json"],
+  ["cause-contract-blind/runs.jsonl", "blind-traces.jsonl"],
 ]) {
   await copyFile(join(evidence, source), join(destination, name));
 }
@@ -94,6 +96,70 @@ if (
 const approval = JSON.parse(
   await readFile(join(evidence, "v3/boundaries.json"), "utf8"),
 );
+const blindScorecard = JSON.parse(
+  await readFile(join(evidence, "cause-contract-blind/paired.json"), "utf8"),
+);
+const blindRuns = (
+  await readFile(join(evidence, "cause-contract-blind/runs.jsonl"), "utf8")
+)
+  .trim()
+  .split("\n")
+  .map((line) => JSON.parse(line));
+const pairs = Map.groupBy(blindRuns, (run) => `${run.incident}/${run.trial}`);
+const corrections = [];
+for (const pair of pairs.values()) {
+  const previous = pair.find((run) => run.arm === "recovery");
+  const revised = pair.find((run) => run.arm === "cause-contract");
+  if (
+    pair.length !== 2 ||
+    !previous ||
+    !revised ||
+    previous.expected !== revised.expected
+  ) {
+    throw new Error("Incomplete or inconsistent blind trial pair");
+  }
+  if (!previous.strict_pass && revised.strict_pass) {
+    corrections.push({ previous, revised });
+  }
+}
+const byCause = Object.entries(blindScorecard.by_cause).map(
+  ([cause, counts]) => {
+    const row = {
+      cause,
+      previous: counts.recovery,
+      revised: counts["cause-contract"],
+    };
+    for (const [arm, count] of [
+      ["recovery", row.previous],
+      ["cause-contract", row.revised],
+    ]) {
+      const trials = blindRuns.filter(
+        (run) => run.arm === arm && run.expected === cause,
+      );
+      if (
+        trials.length !== count.runs ||
+        trials.filter((run) => run.strict_pass).length !== count.passed
+      ) {
+        throw new Error(
+          `Blind trials disagree with the scorecard: ${cause}/${arm}`,
+        );
+      }
+    }
+    return row;
+  },
+);
+if (
+  byCause.reduce(
+    (total, row) => total + row.previous.runs + row.revised.runs,
+    0,
+  ) !== blindRuns.length ||
+  corrections.length !== blindScorecard.paired_outcomes.candidate_only
+) {
+  throw new Error(
+    "Blind scorecard does not match the captured coverage or corrections",
+  );
+}
+const blind = { byCause, corrections };
 await writeFile(
   resolve("app/showcase/recorded-data.json"),
   JSON.stringify({
@@ -102,5 +168,6 @@ await writeFile(
     incidents,
     failures,
     approval,
+    blind,
   }),
 );

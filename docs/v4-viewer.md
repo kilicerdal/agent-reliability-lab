@@ -1,6 +1,6 @@
 # V4 recorded evidence viewer
 
-The static viewer opens on V1’s captured worker failure. Visitors can switch among four recorded investigations, expand tool events, and inspect the evidence behind the independent verdict. V2 compares the two prompts by incident and opens on the recorded invoice-window failure. The selector exposes every failed trial, with its expected and returned cause, citations, and raw trace. Each failure has a shareable URL that restores its selection on reload; unrecognized trial IDs open the default failure. The build checks that the incident counts reconcile with the recorded scorecard. V3 replays the worker state across request, rejection, approval, and completion. The replay controls only select captured snapshots.
+The static viewer opens on V1’s captured worker failure. Visitors can switch among four recorded investigations, expand tool events, and inspect the evidence behind the independent verdict. V2 compares the two prompts by incident and opens on the recorded invoice-window failure. The selector exposes every failed trial, with its expected and returned cause, citations, and raw trace. Each failure has a shareable URL that restores its selection on reload; unrecognized trial IDs open the default failure. The build checks that the incident counts reconcile with the recorded scorecard. The blind evaluation compares strict passes by expected cause and opens both recorded traces for every corrected pair. V3 replays the worker state across request, rejection, approval, and completion. The replay controls only select captured snapshots.
 
 ## Build and preview
 
@@ -12,7 +12,7 @@ npm --prefix dashboard run build:public
 python3 -m http.server 3314 --bind 127.0.0.1 --directory dashboard/out
 ```
 
-Open [the static preview](http://127.0.0.1:3314). To host the viewer, serve `dashboard/out` at the root of a static site. The export contains the viewer and downloadable recordings. It needs no API key, application server, database, or write endpoint. It includes the four V1 captures, V2 scorecard and 48 holdout traces, and V3 approval evidence and all six live-model traces.
+Open [the static preview](http://127.0.0.1:3314). To host the viewer, serve `dashboard/out` at the root of a static site. The export contains the viewer and downloadable recordings. It needs no API key, application server, database, or write endpoint. It includes the four V1 captures, V2 scorecard and 48 holdout traces, V3 approval evidence and all six live-model traces, and the blind scorecard and all 100 paired traces.
 
 The standard Next.js build retains the original V1 viewer at `/` and serves the V4 showcase at `/showcase`. The public export opens the showcase at `/`.
 
@@ -27,7 +27,7 @@ npm --prefix dashboard run build:public
 npm --prefix dashboard run test:public
 ```
 
-The public browser suite starts a static file server and checks desktop and mobile layouts, all three evidence sections, five evidence downloads, keyboard navigation, and accessibility. It checks that browsing sends only same-origin static GET requests. V1–V3 retain their offline evidence verifiers.
+The public browser suite starts a static file server and checks desktop and mobile layouts, all three evidence sections, seven evidence downloads, keyboard navigation, and accessibility. It checks that browsing sends only same-origin static GET requests. V1–V3 retain their offline evidence verifiers.
 
 - [V1 independent evaluation](evaluation.md)
 - [V2 protocol and results](v2-evaluation.md)

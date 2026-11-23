@@ -215,18 +215,156 @@ function Ratio({
   );
 }
 
+type BlindEvaluation = {
+  byCause: {
+    cause: string;
+    previous: { passed: number; runs: number };
+    revised: { passed: number; runs: number };
+  }[];
+  corrections: { previous: Failure; revised: Failure }[];
+};
+const causeNames: Record<string, string> = {
+  db_latency: "Database latency",
+  worker_stopped: "Worker stopped",
+  dependency_config: "Dependency configuration",
+  healthy: "Healthy",
+  unknown: "Insufficient evidence",
+};
+const incidentName = (id: string) => id.replaceAll("-", " ");
+
+function BlindComparison({ blind }: { blind: BlindEvaluation }) {
+  const total = (arm: "previous" | "revised") =>
+    blind.byCause.reduce(
+      (count, row) => ({
+        passed: count.passed + row[arm].passed,
+        runs: count.runs + row[arm].runs,
+      }),
+      { passed: 0, runs: 0 },
+    );
+  const previous = total("previous");
+  const revised = total("revised");
+  return (
+    <section
+      id="blind-evaluation"
+      className={styles.section}
+      aria-labelledby="blind-heading"
+    >
+      <div className={styles.sectionHeading}>
+        <p className={styles.kicker}>Cause-label contract</p>
+        <h2 id="blind-heading">Blind evaluation</h2>
+        <p>
+          Both prompts ran twice on 25 fresh synthetic incidents. Expected
+          labels were withheld from the model.
+        </p>
+      </div>
+      <div className={styles.panel}>
+        <h3>
+          {previous.passed}/{previous.runs} vs. {revised.passed}/{revised.runs}{" "}
+          correct, grounded diagnoses
+        </h3>
+        <table className={styles.incidentTable}>
+          <caption>Strict passes by expected cause</caption>
+          <thead>
+            <tr>
+              <th scope="col">Expected cause</th>
+              <th scope="col">Previous prompt</th>
+              <th scope="col">Revised contract</th>
+            </tr>
+          </thead>
+          <tbody>
+            {blind.byCause.map((row) => (
+              <tr key={row.cause}>
+                <th scope="row">{causeNames[row.cause] ?? row.cause}</th>
+                <td>
+                  {row.previous.passed}/{row.previous.runs}
+                </td>
+                <td>
+                  {row.revised.passed}/{row.revised.runs}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div id="blind-corrections" className={styles.incidentPanel}>
+        <h3>{blind.corrections.length} failures corrected in paired runs</h3>
+        <p>
+          The previous prompt described the right mechanism in each run but
+          assigned the dependency label.
+        </p>
+        {blind.corrections.map(({ previous, revised }) => (
+          <details
+            className={`${styles.panel} ${styles.blindCorrection}`}
+            key={failureKey(previous)}
+          >
+            <summary>
+              {incidentName(previous.incident)} · Trial {previous.trial}
+            </summary>
+            <p>
+              Expected cause <code>{previous.expected}</code>
+            </p>
+            <div className={styles.compareGrid}>
+              {(
+                [
+                  [previous, "Previous prompt"],
+                  [revised, "Revised contract"],
+                ] as const
+              ).map(([run, title]) => (
+                <section
+                  key={run.arm}
+                  aria-label={title}
+                  className={styles.blindArm}
+                >
+                  <h4>{title}</h4>
+                  <p>
+                    <code>{run.diagnosis?.cause ?? "No diagnosis"}</code> ·{" "}
+                    <strong
+                      className={run.strict_pass ? styles.pass : styles.failure}
+                    >
+                      {run.strict_pass ? "Passed grading" : "Failed grading"}
+                    </strong>
+                  </p>
+                  {run.diagnosis && (
+                    <>
+                      <p>{run.diagnosis.explanation}</p>
+                      <Evidence diagnosis={run.diagnosis} trace={run.trace} />
+                    </>
+                  )}
+                  <TraceList
+                    trace={run.trace}
+                    title={`Inspect ${title.toLowerCase()} trace`}
+                  />
+                </section>
+              ))}
+            </div>
+          </details>
+        ))}
+        <p>
+          These results cover author-created synthetic fixtures.{" "}
+          <a href="https://github.com/kilicerdal/agent-reliability-lab/blob/main/docs/blind-cause-evaluation.md">
+            Read the evaluation protocol and limits
+          </a>
+          .
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function Showcase({
   investigations,
   comparison,
   incidents,
   failures,
   approval,
+  blind,
 }: {
   investigations: Investigation[];
   comparison: Comparison;
   incidents: Incident[];
   failures: Failure[];
   approval: Approval;
+  blind: BlindEvaluation;
 }) {
   const [scenario, setScenario] = useState("worker-failure");
   const [stage, setStage] = useState(0);
@@ -269,6 +407,7 @@ export default function Showcase({
           <nav aria-label="Evidence sections">
             <a href="#investigation">Investigation</a>
             <a href="#comparison">Evaluation</a>
+            <a href="#blind-evaluation">Blind evaluation</a>
             <a href="#approval">Approval</a>
           </nav>
         </div>
@@ -534,6 +673,7 @@ export default function Showcase({
             />
           </div>
         </section>
+        <BlindComparison blind={blind} />
         <section
           id="approval"
           className={styles.section}
@@ -666,6 +806,18 @@ export default function Showcase({
               href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/v3-prompt-trials.jsonl`}
             >
               V3 prompt trials · JSONL ↓
+            </a>
+            <a
+              download
+              href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/blind-scorecard.json`}
+            >
+              Blind scorecard · JSON ↓
+            </a>
+            <a
+              download
+              href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/blind-traces.jsonl`}
+            >
+              Blind trials · JSONL ↓
             </a>
           </div>
           <p>
