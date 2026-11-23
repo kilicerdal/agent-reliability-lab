@@ -19,4 +19,4 @@ The [controlled citation challenge](../evidence/assurance/citation-challenge) us
 
 For a sealed external run, repeat the original benchmark command with `--resume`. The runner checks the manifest, locks the output directory, skips durably recorded trials, and replaces the summary atomically. If a trial was interrupted before its result was recorded, the in-flight marker blocks resuming until the uncertain usage is reconciled.
 
-The PostgreSQL integration test interrupts approval after worker state changes and before the audit write. The transaction rolls back and a retry applies exactly once. A simulated inventory fault then leaves the order queued after the restart. Recovery is recorded only after the order completes.
+The PostgreSQL integration test interrupts approval after worker state changes and before the audit write. The transaction rolls back and a retry applies exactly once. A simulated inventory fault then leaves the order queued after the restart. Recovery is recorded only after the order completes. [Recorded remediation outcome](../evidence/assurance/remediation-outcome.json)

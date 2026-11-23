@@ -14,3 +14,5 @@
 Citation review is off by default. The promotion gate requires outside authorship, sufficient weak-citation coverage, and per-model accuracy, support, latency, and cost checks. [Promotion policy](citation-promotion.md) · [Offline reproducibility bundle](reproduce-evidence.md)
 
 The [scoped selective stress run](scoped-reliability.md) recorded 32 trials across eight synthetic incidents. Both models reached 8/8 cause accuracy with review off and selective review. Citation support held at 8/8 for Sol and 7/8 for Luna. The selective policy missed Luna's weak citation on the overlapping-fault case.
+
+A separate [remediation outcome capture](../evidence/assurance/remediation-outcome.json) records an approved restart that left the order queued while inventory was impaired.
