@@ -132,6 +132,20 @@ test("V1 investigation, V2 failure, and V3 replay use static evidence", async ({
     await pair.locator(":scope > summary").click();
   }
 
+  const corrections = blind.locator("#blind-corrections > details");
+  for (const id of [
+    "read-fence-2",
+    "dispatch-profile-1",
+    "maintenance-flag-1",
+  ]) {
+    await page.goto(`/#blind-correction-${id}`, { waitUntil: "networkidle" });
+    await expect(blind.locator(`#blind-correction-${id}`)).toHaveAttribute(
+      "open",
+      "",
+    );
+    await expect(corrections.locator("xpath=self::*[@open]")).toHaveCount(1);
+  }
+
   const replay = page.locator("#replay-state");
   for (const [stage, state, order] of [
     ["Request pending", "Disabled", "queued"],
