@@ -1,0 +1,131 @@
+{
+  "split": "holdout",
+  "repeats": 3,
+  "fixture_sha256": "cdc4b6f04f8da0f11fda291e4e930ead991d5a8b0140b9abf98b893f68b26126",
+  "arms": {
+    "recovery": {
+      "all": {
+        "runs": 18,
+        "correct_cause": 17,
+        "strict_pass": 17,
+        "failure_exposed": 15,
+        "recovered": 14,
+        "retried_timeout": 3,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.158898,
+        "median_ms": 7312.5
+      },
+      "conflict": {
+        "runs": 6,
+        "correct_cause": 6,
+        "strict_pass": 6,
+        "failure_exposed": 6,
+        "recovered": 6,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.048154,
+        "median_ms": 6670.5
+      },
+      "insufficient": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.030272,
+        "median_ms": 8017
+      },
+      "missing": {
+        "runs": 6,
+        "correct_cause": 5,
+        "strict_pass": 5,
+        "failure_exposed": 6,
+        "recovered": 5,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.05487,
+        "median_ms": 7518.5
+      },
+      "timeout": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 3,
+        "recovered": 3,
+        "retried_timeout": 3,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.025602,
+        "median_ms": 6489
+      }
+    },
+    "cause-contract": {
+      "all": {
+        "runs": 18,
+        "correct_cause": 18,
+        "strict_pass": 18,
+        "failure_exposed": 13,
+        "recovered": 13,
+        "retried_timeout": 3,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.156842,
+        "median_ms": 6499.0
+      },
+      "conflict": {
+        "runs": 6,
+        "correct_cause": 6,
+        "strict_pass": 6,
+        "failure_exposed": 5,
+        "recovered": 5,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.051432,
+        "median_ms": 6269.5
+      },
+      "insufficient": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.033262,
+        "median_ms": 6995
+      },
+      "missing": {
+        "runs": 6,
+        "correct_cause": 6,
+        "strict_pass": 6,
+        "failure_exposed": 5,
+        "recovered": 5,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.050146,
+        "median_ms": 6304.0
+      },
+      "timeout": {
+        "runs": 3,
+        "correct_cause": 3,
+        "strict_pass": 3,
+        "failure_exposed": 3,
+        "recovered": 3,
+        "retried_timeout": 3,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.022002,
+        "median_ms": 5465
+      }
+    }
+  }
+}

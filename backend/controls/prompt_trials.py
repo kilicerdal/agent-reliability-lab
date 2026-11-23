@@ -84,6 +84,7 @@ async def run_trial(number, note, client, budget):
                 trace=trace,
                 tools=tools,
                 instructions=INSTRUCTIONS,
+                cause_contract=False,  # Reproduce the original V3 experiment.
             )
 
         diagnosis, _, usage = await anyio.to_thread.run_sync(investigate_over_mcp)

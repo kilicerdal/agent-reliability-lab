@@ -43,7 +43,6 @@ services:
       LAB_INVENTORY_URL: http://inventory:8811
       LAB_BUDGET_FILE: /app/.private/budget.sqlite
     volumes:
-      - ./evidence/runs:/app/evidence/runs
       - ./.private:/app/.private
     depends_on:
       db: {condition: service_healthy}

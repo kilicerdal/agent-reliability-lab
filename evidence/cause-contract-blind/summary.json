@@ -1,0 +1,155 @@
+{
+  "split": "holdout",
+  "repeats": 2,
+  "fixture_sha256": "d7b528dcd66f9d75d50f708a2035ba7fa5bd2d486ecffe04a040288fb00a5cb3",
+  "arms": {
+    "recovery": {
+      "all": {
+        "runs": 50,
+        "correct_cause": 47,
+        "strict_pass": 47,
+        "failure_exposed": 40,
+        "recovered": 38,
+        "retried_timeout": 10,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.402436,
+        "median_ms": 6632.5
+      },
+      "conflict": {
+        "runs": 20,
+        "correct_cause": 20,
+        "strict_pass": 20,
+        "failure_exposed": 20,
+        "recovered": 20,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.16365,
+        "median_ms": 6948.5
+      },
+      "insufficient": {
+        "runs": 2,
+        "correct_cause": 2,
+        "strict_pass": 2,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.019226,
+        "median_ms": 6953.5
+      },
+      "missing": {
+        "runs": 10,
+        "correct_cause": 10,
+        "strict_pass": 10,
+        "failure_exposed": 10,
+        "recovered": 10,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.088984,
+        "median_ms": 6929.5
+      },
+      "none": {
+        "runs": 8,
+        "correct_cause": 7,
+        "strict_pass": 7,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.048306,
+        "median_ms": 5110.5
+      },
+      "timeout": {
+        "runs": 10,
+        "correct_cause": 8,
+        "strict_pass": 8,
+        "failure_exposed": 10,
+        "recovered": 8,
+        "retried_timeout": 10,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.08227,
+        "median_ms": 6159.5
+      }
+    },
+    "cause-contract": {
+      "all": {
+        "runs": 50,
+        "correct_cause": 50,
+        "strict_pass": 50,
+        "failure_exposed": 40,
+        "recovered": 40,
+        "retried_timeout": 10,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.44268,
+        "median_ms": 6132.0
+      },
+      "conflict": {
+        "runs": 20,
+        "correct_cause": 20,
+        "strict_pass": 20,
+        "failure_exposed": 20,
+        "recovered": 20,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.18065,
+        "median_ms": 6389.0
+      },
+      "insufficient": {
+        "runs": 2,
+        "correct_cause": 2,
+        "strict_pass": 2,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.021246,
+        "median_ms": 7271.0
+      },
+      "missing": {
+        "runs": 10,
+        "correct_cause": 10,
+        "strict_pass": 10,
+        "failure_exposed": 10,
+        "recovered": 10,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.095852,
+        "median_ms": 6537.0
+      },
+      "none": {
+        "runs": 8,
+        "correct_cause": 8,
+        "strict_pass": 8,
+        "failure_exposed": 0,
+        "recovered": 0,
+        "retried_timeout": 0,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.052984,
+        "median_ms": 4607.0
+      },
+      "timeout": {
+        "runs": 10,
+        "correct_cause": 10,
+        "strict_pass": 10,
+        "failure_exposed": 10,
+        "recovered": 10,
+        "retried_timeout": 10,
+        "denied_tool": 0,
+        "errors": 0,
+        "estimated_usd": 0.091948,
+        "median_ms": 5591.5
+      }
+    }
+  }
+}

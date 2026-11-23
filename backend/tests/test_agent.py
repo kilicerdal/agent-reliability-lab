@@ -5,6 +5,10 @@ import pytest
 from lab import agent
 from lab.budget import Budget
 
+from backend.lab import run as live_runner
+from backend.reliability.agent import CAUSE_GUIDE
+from backend.reliability.agent import investigate as investigate_reliability
+
 
 class Item:
     def __init__(self, **kwargs):
@@ -97,3 +101,80 @@ def test_step_limit_stops_repeated_tools(tmp_path, monkeypatch):
             "e", "Alert", SimpleNamespace(responses=r), Budget(tmp_path / "b.db")
         )
     assert len(r.payloads) == 8
+
+
+def test_cause_contract_describes_each_enum_without_changing_validation(tmp_path):
+    requests = []
+    for use_contract in (False, True):
+        provider = Responses([response([], answer())])
+        diagnosis, _, _ = investigate_reliability(
+            "Investigate this alert",
+            lambda *_: pytest.fail("No tool was requested"),
+            SimpleNamespace(responses=provider),
+            Budget(tmp_path / "budget.db"),
+            improved=True,
+            trace=[],
+            cause_contract=use_contract,
+        )
+        assert diagnosis.cause == "unknown"
+        requests.append(provider.payloads[0])
+    original, candidate = requests
+    original_cause = original["text"]["format"]["schema"]["properties"]["cause"]
+    candidate_cause = candidate["text"]["format"]["schema"]["properties"]["cause"]
+    assert "description" not in original_cause
+    description = candidate_cause.pop("description")
+    assert candidate_cause == original_cause
+    assert set(original_cause["enum"]) == CAUSE_GUIDE.keys()
+    for label, definition in CAUSE_GUIDE.items():
+        assert f"{label}: {definition}" in description
+    assert "causal subsystem" in candidate["instructions"]
+    assert "expected_cause" not in json.dumps(requests)
+
+
+def test_live_runner_defaults_to_cause_contract_and_keeps_archived_captures_separate(
+    tmp_path, monkeypatch
+):
+    fixture = json.loads(answer())
+    fixture["cause"] = "db_latency"
+    fixture["evidence_ids"] = ["obs-1", "obs-2"]
+    provider = Responses([response([tool()]), response([], json.dumps(fixture))])
+    calls = []
+
+    def dispatch(name, args, experiment):
+        calls.append((name, args, experiment))
+        return {
+            "records": [
+                {"evidence_id": "obs-1", "signal": "query_slow"},
+                {"evidence_id": "obs-2", "signal": "query_config_changed"},
+            ]
+        }
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("LAB_RESULTS_DIR", raising=False)
+    monkeypatch.setenv("LAB_BUDGET_FILE", str(tmp_path / "test-budget.sqlite"))
+    monkeypatch.setattr(live_runner, "init_db", lambda: None)
+    monkeypatch.setattr(live_runner, "reproduce", lambda _: "sql-experiment")
+    monkeypatch.setattr(live_runner, "fingerprint", lambda _: "unchanged")
+    monkeypatch.setattr(live_runner, "dispatch", dispatch)
+    monkeypatch.setattr(
+        live_runner, "OpenAI", lambda **_: SimpleNamespace(responses=provider)
+    )
+    result = live_runner.run("database-slowdown")
+
+    assert calls == [("read_logs", {}, "sql-experiment")]
+    assert result["verdict"]["passed"]
+    assert result["investigator_contract"] == "cause-contract"
+    assert (
+        "db_latency:"
+        in provider.payloads[0]["text"]["format"]["schema"]["properties"]["cause"][
+            "description"
+        ]
+    )
+    assert "retryable timeout" in provider.payloads[0]["instructions"]
+    assert (
+        json.loads(
+            (tmp_path / ".private/live-runs" / f"{result['id']}.json").read_text()
+        )
+        == result
+    )
+    assert not (tmp_path / "evidence").exists()

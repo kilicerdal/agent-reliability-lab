@@ -1,0 +1,172 @@
+{
+  "paired_outcomes": {
+    "both_passed": 47,
+    "candidate_only": 3
+  },
+  "net_strict_passes": 3,
+  "by_cause": {
+    "db_latency": {
+      "recovery": {
+        "passed": 9,
+        "runs": 10
+      },
+      "cause-contract": {
+        "passed": 10,
+        "runs": 10
+      }
+    },
+    "worker_stopped": {
+      "recovery": {
+        "passed": 8,
+        "runs": 10
+      },
+      "cause-contract": {
+        "passed": 10,
+        "runs": 10
+      }
+    },
+    "dependency_config": {
+      "recovery": {
+        "passed": 10,
+        "runs": 10
+      },
+      "cause-contract": {
+        "passed": 10,
+        "runs": 10
+      }
+    },
+    "healthy": {
+      "recovery": {
+        "passed": 10,
+        "runs": 10
+      },
+      "cause-contract": {
+        "passed": 10,
+        "runs": 10
+      }
+    },
+    "unknown": {
+      "recovery": {
+        "passed": 10,
+        "runs": 10
+      },
+      "cause-contract": {
+        "passed": 10,
+        "runs": 10
+      }
+    }
+  },
+  "by_incident": {
+    "catalog-alias": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "catalog-rebuild": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "checkout-read-path": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "consumer-switch": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "customer-region-switch": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "dashboard-lag": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "delayed-page": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "dispatch-profile": {
+      "recovery": 1,
+      "cause-contract": 2
+    },
+    "disputed-fixture": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "drain-never-resumed": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "freight-registry": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "incomplete-order-span": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "inventory-zone": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "lock-queue": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "maintenance-flag": {
+      "recovery": 1,
+      "cause-contract": 2
+    },
+    "orphaned-alert": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "partial-region-log": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "read-fence": {
+      "recovery": 1,
+      "cause-contract": 2
+    },
+    "replayed-error": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "sampling-blackout": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "shift-end-check": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "shipment-canary": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "stock-route-v2": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "warehouse-endpoint": {
+      "recovery": 2,
+      "cause-contract": 2
+    },
+    "zero-worker-pool": {
+      "recovery": 2,
+      "cause-contract": 2
+    }
+  },
+  "improved_causes": [
+    "db_latency",
+    "worker_stopped"
+  ],
+  "regressed_causes": [],
+  "sql_to_dependency_mislabels": {
+    "recovery": 1,
+    "cause-contract": 0
+  },
+  "fixture_sha256": "d7b528dcd66f9d75d50f708a2035ba7fa5bd2d486ecffe04a040288fb00a5cb3",
+  "strict_pass_gate": true
+}
