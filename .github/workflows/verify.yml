@@ -1,4 +1,4 @@
-name: V1 verification
+name: Lab verification
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
@@ -34,6 +34,7 @@ jobs:
           cache-dependency-path: dashboard/package-lock.json
       - run: pip install -r requirements.lock
       - run: python scripts/check-evidence.py
+      - run: python -m backend.reliability.verify
       - name: Start synthetic inventory
         run: |
           python -m uvicorn lab.inventory:app --host 127.0.0.1 --port 8811 > /tmp/inventory.log 2>&1 &
