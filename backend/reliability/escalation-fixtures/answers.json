@@ -1,0 +1,550 @@
+[
+  {
+    "id": "billing-lock",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Settlement reads spend 1.1 seconds waiting on a PostgreSQL row lock"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The current maintenance transaction holds the settlement row lock"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "packing-fleet",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "The current packer queue has no connected consumers or job starts"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The effective packing worker pool is configured for zero replicas"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "catalog-host",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "The current upstream responds with a host mismatch for catalog validation"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The active validation route sends the old host header to the upstream"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "profile-normal",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Current profile refresh jobs complete within their target without backlog"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "Effective profile worker and provider settings match the verified normal baseline"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "statement-pool",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Traces attribute 900 milliseconds to waiting for a PostgreSQL connection"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The effective statement pool limit is two connections instead of thirty"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "quote-retired-path",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "The upstream returns 404 for quote updates sent to the retired path"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The current quote integration targets the retired endpoint"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "notice-config-gap",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Current notice jobs show no starts, but worker telemetry is intermittent in this window"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "Effective worker settings were not retained for the affected window"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "refund-trace-gap",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Only overall refund duration survived; SQL and upstream spans are missing"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The current export contains no effective database or provider settings for the incident"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "statement-conflict",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Both worker starts and SQL timing samples exist, but their relative onset cannot be established"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-d",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-e",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-f",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-g",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-d",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-e",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The deployment journal does not resolve whether the lock or worker drain took effect first"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-f",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-g",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "manifest-conflict",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Current timestamps cannot establish whether worker inactivity preceded provider errors"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-d",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-e",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-f",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-g",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-d",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-e",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "Provider routing changed and the worker was paused, but their effective order is unavailable"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-f",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-g",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "watermark-stale",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "Current watermark jobs finish within target with zero pending work"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The active watermark runtime settings match the last verified healthy configuration"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "enrichment-fleet",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-a",
+        "verdict": "supports",
+        "required_excerpt": "The broker reports no active enrichment consumers and no job starts"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-b",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-a",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-b",
+        "verdict": "supports",
+        "required_excerpt": "The currently active enrichment deployment disables its worker pool"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "obs-c",
+        "verdict": "irrelevant"
+      }
+    ]
+  }
+]

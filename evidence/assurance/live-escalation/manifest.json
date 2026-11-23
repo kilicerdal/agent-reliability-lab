@@ -1,0 +1,9 @@
+{
+  "cases": 12,
+  "protocol_sha256": "e9c9df6006c9e840f30e0e1e9b18cdf4c823679347aa9510ff67431450ce625c",
+  "observations_sha256": "ed7aea447d1717eefc8718e383e7c3f6a29d80a933faaa698cf10ce71f6eff70",
+  "answer_key_sha256": "994c5b471868bb2f25d6410ebab4b3e7f500db99f1b82df19be1e07abde1b1ee",
+  "policy_sha256": "1d3c7b22115f262e15dae25eb67ab2290be8e9f705db8da04e07c1a1bc0d5a76",
+  "runner_sha256": "711b79476eed9acf63b5b37507373cd46a09ae30f746e63db7d6943fb4dccadb",
+  "workers": 4
+}

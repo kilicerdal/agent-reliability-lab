@@ -1,0 +1,683 @@
+[
+  {
+    "id": "billing-lock",
+    "alert": "Billing reads stall shortly after maintenance.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "billing-lock",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Settlement reads spend 1.1 seconds waiting on a PostgreSQL row lock.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "billing-lock",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "db_wait"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The current maintenance transaction holds the settlement row lock.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "billing-lock",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "db_setting"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "The ledger exporter continues to emit heartbeats.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "billing-lock",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "packing-fleet",
+    "alert": "Packing jobs are accepted and remain queued.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "packing-fleet",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "The current packer queue has no connected consumers or job starts.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "packing-fleet",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "no_worker_activity"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The effective packing worker pool is configured for zero replicas.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "packing-fleet",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "worker_disabled"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "The packing API can still accept new work.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "packing-fleet",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "catalog-host",
+    "alert": "Catalog verification began returning the wrong response.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "catalog-host",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "The current upstream responds with a host mismatch for catalog validation.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "catalog-host",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "upstream_mismatch"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The active validation route sends the old host header to the upstream.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "catalog-host",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "route_misconfigured"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "Database reads remain within their normal window.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "catalog-host",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "profile-normal",
+    "alert": "Confirm whether current profile refreshes are stuck.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "profile-normal",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Current profile refresh jobs complete within their target without backlog.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "profile-normal",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "workload_healthy"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "Effective profile worker and provider settings match the verified normal baseline.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "profile-normal",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "config_healthy"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "A cached summary describes last week’s backlog.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "profile-normal",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "statement-pool",
+    "alert": "Statement downloads queue up after an internal configuration change.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "statement-pool",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Traces attribute 900 milliseconds to waiting for a PostgreSQL connection.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-pool",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "db_wait"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The effective statement pool limit is two connections instead of thirty.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-pool",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "db_setting"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "Current upstream probes report successful responses.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-pool",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "quote-retired-path",
+    "alert": "Quote updates fail following a route change.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "quote-retired-path",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "The upstream returns 404 for quote updates sent to the retired path.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "quote-retired-path",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "upstream_mismatch"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The current quote integration targets the retired endpoint.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "quote-retired-path",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "route_misconfigured"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "Current workers are active and draining other queues.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "quote-retired-path",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "notice-config-gap",
+    "alert": "The notice queue is growing while telemetry is incomplete.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "notice-config-gap",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Current notice jobs show no starts, but worker telemetry is intermittent in this window.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "notice-config-gap",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "no_worker_activity"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "Effective worker settings were not retained for the affected window.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "notice-config-gap",
+            "environment": "lab",
+            "source": "deployment"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "A stale summary calls this a confirmed worker stop.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "notice-config-gap",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "refund-trace-gap",
+    "alert": "Refund submissions slowed while traces were being dropped.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "refund-trace-gap",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Only overall refund duration survived; SQL and upstream spans are missing.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "refund-trace-gap",
+            "environment": "lab",
+            "source": "workload"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The current export contains no effective database or provider settings for the incident.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "refund-trace-gap",
+            "environment": "lab",
+            "source": "deployment"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "An old alert mentions a query-plan issue.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "refund-trace-gap",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "statement-conflict",
+    "alert": "Statement processing stalls while the SQL and worker teams report problems.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "statement-conflict",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Both worker starts and SQL timing samples exist, but their relative onset cannot be established.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "workload"
+          }
+        },
+        {
+          "evidence_id": "obs-d",
+          "detail": "Statements wait on a current database lock.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "sql",
+            "signal": "db_wait"
+          }
+        },
+        {
+          "evidence_id": "obs-e",
+          "detail": "No statement consumer starts during the same window.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "worker",
+            "signal": "no_worker_activity"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The deployment journal does not resolve whether the lock or worker drain took effect first.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "deployment"
+          }
+        },
+        {
+          "evidence_id": "obs-f",
+          "detail": "The active maintenance transaction holds the statement table lock.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "deploy",
+            "signal": "db_setting"
+          }
+        },
+        {
+          "evidence_id": "obs-g",
+          "detail": "The current statement worker pool is paused.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "deploy",
+            "signal": "worker_disabled"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "The queue increased during both changes.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "statement-conflict",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "manifest-conflict",
+    "alert": "Parcel manifests stop completing during a provider change.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "manifest-conflict",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Current timestamps cannot establish whether worker inactivity preceded provider errors.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "workload"
+          }
+        },
+        {
+          "evidence_id": "obs-d",
+          "detail": "The provider reports a route mismatch in the current interval.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "provider",
+            "signal": "upstream_mismatch"
+          }
+        },
+        {
+          "evidence_id": "obs-e",
+          "detail": "No manifest consumer starts during the same interval.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "worker",
+            "signal": "no_worker_activity"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "Provider routing changed and the worker was paused, but their effective order is unavailable.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "deployment"
+          }
+        },
+        {
+          "evidence_id": "obs-f",
+          "detail": "The effective provider route targets the retired manifest endpoint.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "deploy",
+            "signal": "route_misconfigured"
+          }
+        },
+        {
+          "evidence_id": "obs-g",
+          "detail": "The current manifest worker pool is paused.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "deploy",
+            "signal": "worker_disabled"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "A summary blames only the provider without a current timestamp.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "manifest-conflict",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "watermark-stale",
+    "alert": "A monitoring dashboard still reports a watermark alert.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "watermark-stale",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "Current watermark jobs finish within target with zero pending work.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "watermark-stale",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "workload_healthy"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The active watermark runtime settings match the last verified healthy configuration.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "watermark-stale",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "config_healthy"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "The historical alert predates the current run.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "watermark-stale",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "enrichment-fleet",
+    "alert": "Enrichment work is submitted and remains unprocessed.",
+    "window": {
+      "start": "2026-11-23T13:00:00Z",
+      "end": "2026-11-23T13:30:00Z",
+      "service": "enrichment-fleet",
+      "environment": "lab"
+    },
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "obs-a",
+          "detail": "The broker reports no active enrichment consumers and no job starts.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "enrichment-fleet",
+            "environment": "lab",
+            "source": "workload",
+            "signal": "no_worker_activity"
+          }
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "obs-b",
+          "detail": "The currently active enrichment deployment disables its worker pool.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "enrichment-fleet",
+            "environment": "lab",
+            "source": "deployment",
+            "signal": "worker_disabled"
+          }
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "obs-c",
+          "detail": "The upstream inspection reports normal service health.",
+          "context": {
+            "timestamp": "2026-11-23T13:15:00Z",
+            "service": "enrichment-fleet",
+            "environment": "lab",
+            "source": "summary"
+          }
+        }
+      ]
+    }
+  }
+]

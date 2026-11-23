@@ -42,7 +42,7 @@ The offline escalation replay uses the scoped stress capture. It substitutes the
 | Sol | 8/8 | 8/8 | 10.45 s | $0.101298 |
 | Luna then Sol | 8/8 | 8/8 | 18.12 s | $0.061941 |
 
-The replay escalated four of eight cases. Live escalation, a fresh independent cohort, and an unassisted rules baseline are still needed to assess the policy. [Decision replay and per-trial results](../evidence/assurance/selective-stress/decision-policies.json)
+The replay escalated four of eight cases. The live benchmark below tests escalation on a separate cohort. Independent cases and an unassisted rules baseline are still needed. [Decision replay and per-trial results](../evidence/assurance/selective-stress/decision-policies.json)
 
 ## Stateful remediation scenarios
 
@@ -56,4 +56,22 @@ The static workbench compares any two available paired or selective stress trial
 
 ## Remaining evaluation work
 
-The independent suite requires an outside reviewer to author and seal the cases. Live escalation and a broader targeted-read cohort remain unmeasured. The stateful suite scores operator approval and workload recovery. An agent-driven investigation across state transitions still needs an evaluation, and the explanation audit still needs independently annotated model outputs.
+The independent suite requires an outside reviewer to author and seal the cases. A broader targeted-read cohort remains unmeasured. The live escalation benchmark below tests the policy on a separate lab-authored cohort. The stateful suite scores operator approval and workload recovery. An agent-driven investigation across state transitions still needs an evaluation, and the explanation audit still needs independently annotated model outputs.
+
+## Live Luna-to-Sol benchmark
+
+The [decision criteria](../backend/reliability/escalation-fixtures/policy.json) and [12 new lab-authored synthetic cases](../backend/reliability/escalation-fixtures/observations.json) were hashed before the first request. The cases cover six routine faults, two healthy controls, two missing-evidence incidents, and two overlapping faults. The escalation policy keeps Luna's initial diagnosis when scoped evidence makes it confirmed. Otherwise, Sol runs a separate investigation from the same alert. The standalone Sol arm is a separate live call. The escalation arm shares its first Luna investigation with the Luna-only arm.
+
+| Policy | Cause accuracy | Citation support | p95 | Estimated API cost |
+| --- | ---: | ---: | ---: | ---: |
+| Luna | 12/12 | 10/12 | 10.44 s | $0.007855 |
+| Sol | 12/12 | 12/12 | 11.28 s | $0.128686 |
+| Luna then Sol | 12/12 | 12/12 | 18.91 s | $0.059183 |
+
+The policy escalated four cases and missed no opportunity to match a supported standalone Sol result. Neither model picked a definitive cause on any of the four unresolved incidents in the retained policy outputs. Escalation saved 54.01% versus Sol and preserved every case result, but added 7.623 s at p95, beyond the pre-specified 3 s allowance. The policy remains experimental. The study used four concurrent incidents, one run per policy and case, and $0.187869 in estimated API credits across the actual requests. The p95 is the largest observation in this 12-incident sample. An independently authored suite remains pending.
+
+[Sealed manifest, results, and traces](../evidence/assurance/live-escalation)
+
+```sh
+python -m backend.reliability.live_escalation --replay --output evidence/assurance/live-escalation
+```

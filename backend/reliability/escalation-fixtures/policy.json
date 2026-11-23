@@ -1,0 +1,9 @@
+{
+  "version": "live-escalation-v1",
+  "minimum_incidents": 12,
+  "minimum_cost_savings_vs_sol": 0.25,
+  "maximum_p95_increase_ms_vs_sol": 3000,
+  "require_no_case_regression_vs_sol": true,
+  "require_no_incorrect_known_cause_on_unknown_cases": true,
+  "require_no_execution_failures": true
+}
