@@ -252,25 +252,51 @@ const pairedRows = (
   .trim()
   .split("\n")
   .map(JSON.parse);
+const workbenchTrial = (row, cohort) => ({
+  id: `${cohort}-${row.model}-${row.incident}-${row.repeat}`,
+  cohort,
+  toolErrors: [
+    ...new Set(
+      row.trace
+        .filter((event) => event.type === "tool")
+        .map(
+          (event) =>
+            event.result.error || (event.result.partial ? "partial" : null),
+        )
+        .filter(Boolean),
+    ),
+  ],
+  model: row.model,
+  incident: row.incident,
+  cause: row.diagnosis?.cause ?? "No diagnosis",
+  before: row.original_verdict,
+  after: row.verdict,
+  records: [
+    ...new Map(
+      row.trace
+        .filter((event) => event.type === "tool" && event.ok)
+        .flatMap((event) => event.result.records ?? [])
+        .map((record) => [record.evidence_id, record]),
+    ).values(),
+  ],
+});
 const pairedCitations = {
   blind: blindCitation,
   summary: pairedSummary,
-  trials: pairedRows.map((row) => ({
-    id: `${row.model}-${row.incident}-${row.repeat}`,
-    model: row.model,
-    incident: row.incident,
-    cause: row.diagnosis?.cause ?? "No diagnosis",
-    before: row.original_verdict,
-    after: row.verdict,
-    records: [
-      ...new Map(
-        row.trace
-          .filter((event) => event.type === "tool" && event.ok)
-          .flatMap((event) => event.result.records ?? [])
-          .map((record) => [record.evidence_id, record]),
-      ).values(),
-    ],
-  })),
+  trials: pairedRows.map((row) => workbenchTrial(row, "paired")),
+  stressTrials: (
+    await readFile(
+      join(evidence, "assurance/selective-stress/runs.jsonl"),
+      "utf8",
+    )
+  )
+    .trim()
+    .split("\n")
+    .map(JSON.parse)
+    .filter(
+      (row) => row.prompt === "selective-citations" && row.original_verdict,
+    )
+    .map((row) => workbenchTrial(row, "stress")),
 };
 await writeFile(
   resolve("app/showcase/recorded-data.json"),

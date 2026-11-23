@@ -6,7 +6,11 @@ import pytest
 
 from backend.reliability import recovery_benchmark as benchmark
 from backend.reliability.agent import investigate
-from backend.reliability.assurance import ClaimCitation, SupportedDiagnosis
+from backend.reliability.assurance import (
+    CitationReview,
+    ClaimCitation,
+    SupportedDiagnosis,
+)
 from backend.reliability.blind_intake import incident_dispatch, load_suite
 from backend.reliability.incident_quality import (
     check_explanation,
@@ -203,3 +207,159 @@ def test_sealed_resume_skips_completed_and_blocks_uncertain_trials(
         == 2
     )
     assert calls[-1] == initial[1]["model"]
+
+
+@pytest.mark.parametrize(
+    ("incident_id", "expected_trigger"),
+    [
+        ("overlapping-faults", "conflicting_current_signals"),
+        ("counterfactual-confirmed", None),
+    ],
+)
+def test_selective_review_routes_scoped_conflicts(
+    suite, monkeypatch, incident_id, expected_trigger
+):
+    cases, key = suite
+    case, answer = cases[incident_id], key[incident_id]
+    recorded = json.loads((FIXTURES / "selective-routing.json").read_text())
+    row = next(
+        row
+        for row in recorded
+        if row["incident"] == incident_id
+        and row["model"] == "gpt-6-luna"
+        and row["prompt"] == "selective-citations"
+    )
+    calls = []
+
+    def replay(_alert, _dispatch, _client, _budget, **options):
+        calls.append(options)
+        if len(calls) == 1:
+            options["trace"].extend(
+                event
+                for event in row["trace"]
+                if event.get("phase") != "citation_review"
+            )
+            return SupportedDiagnosis.model_validate(row["original_diagnosis"]), [], {}
+        return CitationReview(claims=[]), [], {}
+
+    monkeypatch.setattr(benchmark, "investigate", replay)
+    monkeypatch.setattr(benchmark, "Budget", lambda **_: object())
+    result = benchmark.run_once(
+        None,
+        row["model"],
+        row["prompt"],
+        case.alert,
+        incident_dispatch(case),
+        answer.cause,
+        answer.judgments,
+        incident=case,
+    )
+    if expected_trigger:
+        assert row["citation_review"] == "skipped"
+        assert not row["original_verdict"]["passed"]
+        assert expected_trigger in result["review_triggers"]
+        assert len(calls) == 2
+    else:
+        assert result["citation_review"] == "skipped"
+        assert len(calls) == 1
+    assert result["verdict"]["cause_correct"]
+
+
+@pytest.mark.parametrize(
+    ("incident_id", "initial_correct"),
+    [("counterfactual-confirmed", False), ("counterfactual-unresolved", True)],
+)
+def test_targeted_read_scores_same_initial_diagnosis(
+    suite, monkeypatch, incident_id, initial_correct
+):
+    cases, key = suite
+    case, answer = cases[incident_id], key[incident_id]
+    initial = SupportedDiagnosis(
+        cause="unknown",
+        explanation="The effective configuration is not yet established.",
+        alternative="The parcel worker could be stopped.",
+        next_check="Read the current deployment settings.",
+        evidence_ids=["n-5"],
+        claims=[
+            ClaimCitation(
+                kind=kind, evidence_id="n-5", quote=case.tools["read_logs"][0].detail
+            )
+            for kind in ("mechanism", "configuration")
+        ],
+    )
+    final = initial.model_copy(
+        update={
+            "cause": answer.cause,
+            "evidence_ids": ["n-5", "n-3"],
+            "claims": [
+                ClaimCitation(
+                    kind=rule.kind,
+                    evidence_id=rule.evidence_id,
+                    quote=rule.required_excerpt,
+                )
+                for rule in answer.judgments
+                if rule.verdict == "supports"
+            ],
+        }
+    )
+
+    def tool_call(name):
+        return SimpleNamespace(
+            type="function_call",
+            name=name,
+            arguments="{}",
+            call_id=name,
+            model_dump=lambda **_: {"type": "function_call", "call_id": name},
+        )
+
+    responses = iter(
+        [
+            ([tool_call("read_logs")], None),
+            ([], initial),
+            ([tool_call("read_deployments")], None),
+            ([], final),
+        ]
+    )
+    payloads = []
+
+    def create(**payload):
+        payloads.append(payload)
+        output, diagnosis = next(responses)
+        return SimpleNamespace(
+            output=output,
+            output_text=diagnosis.model_dump_json() if diagnosis else "",
+            id="mock",
+            model="fixture",
+            usage=SimpleNamespace(input_tokens=1, output_tokens=1),
+        )
+
+    monkeypatch.setattr(
+        benchmark,
+        "Budget",
+        lambda **_: SimpleNamespace(reserve=lambda: "mock", settle=lambda *_: 0),
+    )
+    result = benchmark.run_once(
+        SimpleNamespace(responses=SimpleNamespace(create=create)),
+        "gpt-6-luna",
+        "check-support",
+        case.alert,
+        incident_dispatch(case),
+        answer.cause,
+        answer.judgments,
+        incident=case,
+    )
+    quality = result["evidence_quality"]
+    comparison = quality["followup_comparison"]
+    assert quality["followup_initial_cause"] == "unknown"
+    assert quality["followup_tool"] == "read_deployments"
+    assert comparison["read_observed"]
+    assert comparison["before"]["cause_correct"] is initial_correct
+    assert not comparison["before"]["passed"]
+    assert comparison["final_cause"] == answer.cause
+    assert comparison["after"]["passed"]
+    assert result["verdict"] == comparison["after"]
+    assert payloads[2]["tool_choice"] == {
+        "type": "function",
+        "name": "read_deployments",
+    }
+    assert len(payloads) == 4

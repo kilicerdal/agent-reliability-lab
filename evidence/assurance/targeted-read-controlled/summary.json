@@ -1,0 +1,44 @@
+{
+  "gpt-6.2-sol/stop": {
+    "runs": 2,
+    "correct_cause": 1,
+    "supported": 0,
+    "median_model_ms": 0.0,
+    "estimated_usd": 0
+  },
+  "gpt-6.2-sol/targeted": {
+    "runs": 2,
+    "correct_cause": 2,
+    "supported": 2,
+    "median_model_ms": 4913.5,
+    "estimated_usd": 0.007802
+  },
+  "gpt-6.2-sol/broad": {
+    "runs": 2,
+    "correct_cause": 2,
+    "supported": 2,
+    "median_model_ms": 4600.5,
+    "estimated_usd": 0.00782
+  },
+  "gpt-6-luna/stop": {
+    "runs": 2,
+    "correct_cause": 1,
+    "supported": 0,
+    "median_model_ms": 0.0,
+    "estimated_usd": 0
+  },
+  "gpt-6-luna/targeted": {
+    "runs": 2,
+    "correct_cause": 1,
+    "supported": 1,
+    "median_model_ms": 5699.0,
+    "estimated_usd": 0.000476
+  },
+  "gpt-6-luna/broad": {
+    "runs": 2,
+    "correct_cause": 2,
+    "supported": 2,
+    "median_model_ms": 5063.5,
+    "estimated_usd": 0.000435
+  }
+}

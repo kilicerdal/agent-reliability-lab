@@ -101,6 +101,7 @@ def report(rows, manifest):
                 "initial_cause": row["evidence_quality"]["followup_initial_cause"],
                 "final_cause": (row["diagnosis"] or {}).get("cause"),
                 "expected_cause": row["expected"],
+                **row["evidence_quality"].get("followup_comparison", {}),
             }
             for row in cohort
             if row["evidence_quality"]["followup_tool"]

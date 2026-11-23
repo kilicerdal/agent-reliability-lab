@@ -6,6 +6,7 @@ import json
 import os
 import time
 from collections import defaultdict
+from hashlib import sha256
 from pathlib import Path
 from statistics import median
 
@@ -75,9 +76,11 @@ def run_once(client, model, prompt, alert, tools, answer, rubric, *, incident=No
     quality = None
     followup_tool = None
     followup_initial_cause = None
+    followup_before = None
+    followup_comparison = None
 
     def choose_followup(initial, events):
-        nonlocal followup_tool, followup_initial_cause
+        nonlocal followup_tool, followup_initial_cause, followup_before
         report = evidence_decision(
             incident, initial, records=current_records(incident, events)
         )
@@ -87,6 +90,7 @@ def run_once(client, model, prompt, alert, tools, answer, rubric, *, incident=No
         }:
             followup_tool = handoff["next_tool"]
             followup_initial_cause = initial.cause
+            followup_before = grade_claims(initial, answer, events, rubric)
         return followup_tool
 
     if incident and incident.window:
@@ -108,6 +112,16 @@ def run_once(client, model, prompt, alert, tools, answer, rubric, *, incident=No
             + CITATION_INSTRUCTIONS
             + (CHECK_SUPPORT if prompt != "basic-citations" else ""),
         )
+        if followup_tool:
+            followup_comparison = {
+                "before": followup_before,
+                "after": grade_claims(diagnosis, answer, trace, rubric),
+                "final_cause": diagnosis.cause,
+                "read_observed": any(
+                    event["type"] == "tool" and event.get("name") == followup_tool
+                    for event in trace
+                ),
+            }
         if verified:
             original = diagnosis.model_dump()
             initial_elapsed_ms = round((time.monotonic() - start) * 1000)
@@ -119,6 +133,13 @@ def run_once(client, model, prompt, alert, tools, answer, rubric, *, incident=No
             }
             if not checks["passed"]:
                 review_triggers.append("incomplete_or_invalid_citation")
+            if incident and incident.window:
+                scoped = current_records(incident, trace)
+                scope = evidence_decision(incident, diagnosis, records=scoped)
+                if not scope["scope_checks"]["passed"]:
+                    review_triggers.append("citation_outside_incident_scope")
+                if scope["handoff"] and scope["handoff"]["conflicting_causes"]:
+                    review_triggers.append("conflicting_current_signals")
             if inconsistent or any(
                 any(
                     marker in detail.lower()
@@ -193,6 +214,11 @@ def run_once(client, model, prompt, alert, tools, answer, rubric, *, incident=No
             ),
             "followup_tool": followup_tool,
             "followup_initial_cause": followup_initial_cause,
+            **(
+                {"followup_comparison": followup_comparison}
+                if followup_comparison
+                else {}
+            ),
             "diagnosis": evidence_decision(
                 incident, diagnosis, records=current_records(incident, trace)
             )
@@ -420,13 +446,18 @@ def run_suite(
     return rows
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--env-file", type=Path)
     parser.add_argument("--cases", type=Path)
     parser.add_argument("--key", type=Path)
     parser.add_argument("--sealed", type=Path)
+    parser.add_argument(
+        "--bundle",
+        action="store_true",
+        help="Keep frozen inputs with the private capture",
+    )
     parser.add_argument(
         "--resume", action="store_true", help="Resume a sealed external run"
     )
@@ -435,15 +466,15 @@ def main():
     modes.add_argument("--citation-review", action="store_true")
     modes.add_argument("--paired-citation-review", action="store_true")
     modes.add_argument("--live-selective-citation-review", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     intake = (args.cases, args.key, args.sealed)
     if any(intake) and not all(intake):
         parser.error("Provide the independent cases, answer key, and sealed manifest")
     if args.env_file:
         load_dotenv(args.env_file, override=False)
     external = args.cases is not None
-    if args.resume and not external:
-        parser.error("Only sealed external runs can resume")
+    if (args.resume or args.bundle) and not external:
+        parser.error("Resume and capture bundling require a sealed external suite")
     if external:
         observations, key, manifest = load_suite(args.cases, args.key)
         if json.loads(args.sealed.read_text()) != manifest:
@@ -473,6 +504,24 @@ def main():
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             parser.error("Another benchmark is using this output directory")
+        if args.bundle:
+            for source, filename, digest in (
+                (args.cases, "observations.json", manifest["observations_sha256"]),
+                (args.key, "answers.json", manifest["answer_key_sha256"]),
+            ):
+                content = source.read_bytes()
+                if sha256(content).hexdigest() != digest:
+                    parser.error(f"Frozen {filename} changed before bundling")
+                destination = args.output / filename
+                if destination.exists():
+                    if destination.read_bytes() != content:
+                        parser.error(f"Capture already has a different {filename}")
+                else:
+                    fd = os.open(
+                        destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600
+                    )
+                    with os.fdopen(fd, "wb") as bundled:
+                        bundled.write(content)
         manifest_path = args.output / "manifest.json"
         if args.resume:
             if json.loads(manifest_path.read_text()) != json.loads(

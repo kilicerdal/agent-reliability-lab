@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { RecoveryComparison } from "./model-comparison";
+import TrialWorkbench from "./trial-workbench";
 import styles from "./showcase.module.css";
 
 type Claim = {
@@ -11,7 +12,9 @@ type Claim = {
   verdict: string;
 };
 type Verdict = { cause_correct: boolean; passed: boolean; claims: Claim[] };
-type Trial = {
+export type Trial = {
+  cohort: string;
+  toolErrors: string[];
   id: string;
   incident: string;
   model: string;
@@ -30,6 +33,7 @@ export type PairedEvidence = {
   blind: Record<string, Totals>;
   summary: Record<string, Policy>;
   trials: Trial[];
+  stressTrials: Trial[];
 };
 
 const models = { "gpt-6.2-sol": "Sol", "gpt-6-luna": "Luna" };
@@ -200,6 +204,7 @@ export default function PairedCitations({
           ))}
         </dl>
       </div>
+      <TrialWorkbench trials={[...evidence.trials, ...evidence.stressTrials]} />
       {weak && (
         <div className={styles.panel}>
           <h3>Try grading a citation</h3>
