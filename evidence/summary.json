@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "reviewed_on": "2026-11-22",
+  "model": "gpt-6.2-sol",
+  "capture_count": 4,
+  "passed": 4,
+  "estimated_capture_cost_usd": 0.029218,
+  "source_digest": "2f2390c985e42782a05a48268678d4d6039d3033adfb5122bd82978f806202e7",
+  "scenarios": [
+    {
+      "scenario": "database-slowdown",
+      "capture": "runs/91283aa1-ba9b-406d-b5cb-321e052d2d10.json",
+      "elapsed_ms": 5707,
+      "passed": true
+    },
+    {
+      "scenario": "dependency-failure",
+      "capture": "runs/253a66a2-151f-4071-b43a-6730b0570947.json",
+      "elapsed_ms": 4414,
+      "passed": true
+    },
+    {
+      "scenario": "healthy",
+      "capture": "runs/b3d2a133-46af-45ea-91e3-84c8857e50f6.json",
+      "elapsed_ms": 7902,
+      "passed": true
+    },
+    {
+      "scenario": "worker-failure",
+      "capture": "runs/540c50df-e8e4-4481-8ca6-941c87961a53.json",
+      "elapsed_ms": 5319,
+      "passed": true
+    }
+  ],
+  "scope": "One live capture per authored development case. Not a held-out benchmark, general accuracy estimate or production-readiness result. Token costs use documented standard rates; invoice not verified.",
+  "verification": {
+    "backend_tests": 23,
+    "browser_executions": 6,
+    "ci": "https://github.com/kilicerdal/agent-reliability-lab/actions/runs/45090199177",
+    "native": "passed",
+    "compose": "passed"
+  }
+}
