@@ -55,6 +55,8 @@ jobs:
           cmp "${RUNNER_TEMP}/decision-policies.json" evidence/assurance/selective-stress/decision-policies.json
           python -m backend.reliability.targeted_experiment --replay --output evidence/assurance/targeted-read-controlled > "${RUNNER_TEMP}/targeted-read.json"
           cmp "${RUNNER_TEMP}/targeted-read.json" evidence/assurance/targeted-read-controlled/summary.json
+          python -m backend.reliability.live_escalation --replay --output evidence/assurance/live-escalation > "${RUNNER_TEMP}/live-escalation.json"
+          cmp "${RUNNER_TEMP}/live-escalation.json" evidence/assurance/live-escalation/summary.json
       - name: Start synthetic inventory
         run: |
           python -m uvicorn lab.inventory:app --host 127.0.0.1 --port 8811 > /tmp/inventory.log 2>&1 &

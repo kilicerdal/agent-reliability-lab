@@ -16,3 +16,5 @@ Citation review is off by default. The promotion gate requires outside authorshi
 The [scoped selective stress run](scoped-reliability.md) recorded 32 trials across eight synthetic incidents. Both models reached 8/8 cause accuracy with review off and selective review. Citation support held at 8/8 for Sol and 7/8 for Luna. The selective policy missed Luna's weak citation on the overlapping-fault case.
 
 A separate [remediation outcome capture](../evidence/assurance/remediation-outcome.json) records an approved restart that left the order queued while inventory was impaired.
+
+[Live escalation](benchmark-platform.md#live-luna-to-sol-benchmark) matched Sol at 12/12 for cause accuracy and citation support and reduced estimated cost by 54.01%. Its p95 rose from 11.28 s to 18.91 s, exceeding the frozen latency allowance. The default remains unchanged.

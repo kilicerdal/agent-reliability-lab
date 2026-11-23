@@ -337,3 +337,36 @@ test("the static workbench filters and exports a two-trial comparison", async ({
     trials.every((trial: { cause: string }) => trial.cause === "healthy"),
   ).toBe(true);
 });
+
+test("the live escalation report and traces are served as static evidence", async ({
+  page,
+  request,
+  baseURL,
+}) => {
+  const nonStatic: string[] = [];
+  page.on("request", (entry) => {
+    if (
+      entry.method() !== "GET" ||
+      !entry.url().startsWith(`${baseURL}/`) ||
+      new URL(entry.url()).pathname.startsWith("/api/")
+    ) {
+      nonStatic.push(entry.url());
+    }
+  });
+  await page.goto("/#live-escalation");
+  const section = page.locator("#live-escalation");
+  await expect(section.getByRole("table").locator("tbody tr")).toHaveCount(3);
+  await section
+    .getByLabel("Escalation incident", { exact: true })
+    .selectOption("notice-config-gap");
+  await expect(
+    section.locator("li").filter({ hasText: /expected\s+unknown/ }),
+  ).toHaveCount(3);
+  const href = await section
+    .getByRole("link", { name: "Complete trial traces" })
+    .getAttribute("href");
+  const traces = await request.get(href!);
+  expect(traces.ok()).toBe(true);
+  expect((await traces.text()).trim().split("\n")).toHaveLength(12);
+  expect(nonStatic).toEqual([]);
+});

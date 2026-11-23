@@ -32,6 +32,8 @@ for (const [source, name] of [
   ["assurance/live-recovery/summary.json", "model-comparison.json"],
   ["assurance/live-recovery/runs.jsonl", "model-comparison-traces.jsonl"],
   ["assurance/database-boundary.json", "scoped-approval.json"],
+  ["assurance/live-escalation/runs.jsonl", "live-escalation-traces.jsonl"],
+  ["assurance/live-escalation/summary.json", "live-escalation-summary.json"],
 ]) {
   await copyFile(join(evidence, source), join(destination, name));
 }
@@ -309,5 +311,6 @@ await writeFile(
     blind,
     recoveryComparison,
     pairedCitations,
+    liveEscalation: await readCapture("assurance/live-escalation/summary.json"),
   }),
 );
