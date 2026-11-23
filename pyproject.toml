@@ -1,7 +1,7 @@
 [project]
 name = "agent-reliability-lab"
-version = "2.0.0"
-description = "Read-only AI incident investigations with independent deterministic evaluation"
+version = "3.0.0"
+description = "AI incident investigations with deterministic evaluation and operator-approved remediation"
 requires-python = ">=3.13,<3.15"
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -39,6 +39,7 @@ services:
     environment:
       LAB_DATABASE_URL: postgresql://lab:lab@db:5432/lab
       LAB_READER_DSN: postgresql://lab_reader:lab_reader@db:5432/lab
+      LAB_MCP_DSN: postgresql://lab_mcp:lab_mcp@db:5432/lab
       LAB_INVENTORY_URL: http://inventory:8811
       LAB_BUDGET_FILE: /app/.private/budget.sqlite
     volumes:

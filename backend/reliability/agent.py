@@ -8,16 +8,26 @@ from backend.lab.tools import TOOLS
 RECOVERY = """ If a tool reports a retryable timeout, retry that tool once. If a source is unavailable, use other read tools and their independent observations. Prefer current direct measurements to stale summaries, and cite corroboration from both workload and configuration when available. If essential evidence is absent or current credible observations still conflict, choose unknown and cite what limits your conclusion."""
 
 
-def investigate(alert, dispatch, client, budget, *, improved, trace):
+def investigate(
+    alert,
+    dispatch,
+    client,
+    budget,
+    *,
+    improved,
+    trace,
+    tools=TOOLS,
+    instructions=PROMPT,
+):
     messages = [{"role": "user", "content": alert}]
     start = time.monotonic()
     total = 0
     for step in range(8):
         payload = {
             "model": MODEL,
-            "instructions": PROMPT + (RECOVERY if improved else ""),
+            "instructions": instructions + (RECOVERY if improved else ""),
             "input": messages,
-            "tools": TOOLS,
+            "tools": tools,
             "parallel_tool_calls": False,
             "max_output_tokens": 4096,
             "reasoning": {"effort": "low"},
