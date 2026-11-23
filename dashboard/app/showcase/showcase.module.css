@@ -590,3 +590,15 @@
 .incidentPanel > p a {
   color: var(--green);
 }
+
+.modelTable tbody th {
+  text-transform: none;
+}
+@media (max-width: 480px) {
+  .modelTable {
+    font-size: 0.75rem;
+  }
+  .modelTable :is(th, td) {
+    padding-inline: 0.2rem;
+  }
+}

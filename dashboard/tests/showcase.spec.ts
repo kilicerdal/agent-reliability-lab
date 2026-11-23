@@ -146,6 +146,44 @@ test("V1 investigation, V2 failure, and V3 replay use static evidence", async ({
     await expect(corrections.locator("xpath=self::*[@open]")).toHaveCount(1);
   }
 
+  const modelComparison = page.getByRole("region", {
+    name: "Model comparison",
+    exact: true,
+  });
+  await expect(modelComparison).toContainText(
+    "32/32 runs chose the right cause",
+  );
+  await expect(modelComparison).toContainText(
+    "23/32 also backed the diagnosis",
+  );
+  const modelRows = modelComparison.getByRole("table").locator("tbody tr");
+  await expect(modelRows).toHaveCount(4);
+  for (const [index, expected] of [
+    [0, ["8/8", "7.77 s", "$0.1007"]],
+    [1, ["8/8", "7.94 s", "$0.1059"]],
+    [2, ["3/8", "6.72 s", "$0.0058"]],
+    [3, ["4/8", "6.23 s", "$0.0058"]],
+  ] as const) {
+    await expect(modelRows.nth(index).getByRole("cell")).toHaveText([
+      ...expected,
+    ]);
+  }
+  await modelComparison
+    .getByText("Compare citations for the same incident")
+    .click();
+  await expect(
+    modelComparison
+      .getByRole("region", { name: "GPT-6 Luna" })
+      .getByText("irrelevant", { exact: true })
+      .first(),
+  ).toBeVisible();
+  await expect(
+    modelComparison
+      .getByRole("region", { name: "GPT-6.2 Sol" })
+      .getByText("supports", { exact: true })
+      .first(),
+  ).toBeVisible();
+
   const replay = page.locator("#replay-state");
   for (const [stage, state, order] of [
     ["Request pending", "Disabled", "queued"],
@@ -208,11 +246,21 @@ test("the export includes the complete downloadable evidence", async ({
     .evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
     );
-  expect(links).toHaveLength(7);
+  expect(links).toHaveLength(10);
   const responses = await Promise.all(links.map((link) => request.get(link)));
   expect(responses.every((response) => response.ok())).toBe(true);
-  const [v1, scorecard, v2, approval, v3, blindScorecard, blindTraces] =
-    await Promise.all(responses.map((response) => response.text()));
+  const [
+    v1,
+    scorecard,
+    v2,
+    approval,
+    v3,
+    blindScorecard,
+    blindTraces,
+    modelSummary,
+    recoveryTraces,
+    scopedApproval,
+  ] = await Promise.all(responses.map((response) => response.text()));
   expect(JSON.parse(v1)).toHaveLength(4);
   expect(JSON.parse(scorecard).arms.recovery.all.strict_pass).toBe(23);
   expect(v2.trim().split("\n")).toHaveLength(48);
@@ -223,4 +271,9 @@ test("the export includes the complete downloadable evidence", async ({
     candidate_only: 3,
   });
   expect(blindTraces.trim().split("\n")).toHaveLength(100);
+  expect(JSON.parse(modelSummary)["gpt-6.2-sol/check-support"].supported).toBe(
+    8,
+  );
+  expect(recoveryTraces.trim().split("\n")).toHaveLength(32);
+  expect(JSON.parse(scopedApproval).checks.database_identity_scoped).toBe(true);
 });
