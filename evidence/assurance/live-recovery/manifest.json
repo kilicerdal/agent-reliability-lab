@@ -1,0 +1,23 @@
+{
+  "suite": {
+    "http-timeout": "00575f5af8f63cfd162591481d25b6801514da03c7dfdce4aae54bc66e8e3281",
+    "sql-timeout": "b2a9cac0db99458dc77b45825c4ccc86ce7a293f13493e7dcc14e8380ac1b685",
+    "telemetry-loss": "bc53bc41af24d176345f0806bcdf886358ea5523f894c5522e0f8034aa497b46",
+    "stale-conflict": "195ea22fc22952c55b6aa19f6a3ae3a41ca3cba7390103f4ec93516acf9ebc93"
+  },
+  "repeats": 2,
+  "rates_per_million": {
+    "gpt-6.2-sol": [
+      2,
+      10
+    ],
+    "gpt-6-luna": [
+      0.1,
+      0.5
+    ]
+  },
+  "limits": {
+    "elapsed_seconds": 25.0,
+    "estimated_usd": 0.03
+  }
+}

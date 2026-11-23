@@ -33,8 +33,12 @@ def investigate(
     tools=TOOLS,
     instructions=PROMPT,
     cause_contract=True,
+    response_model=Diagnosis,
+    model=MODEL,
+    deadline=None,
+    max_requests=8,
 ):
-    schema = Diagnosis.model_json_schema()
+    schema = response_model.model_json_schema()
     if cause_contract:
         schema["properties"]["cause"]["description"] = " ".join(
             f"{label}: {meaning}" for label, meaning in CAUSE_GUIDE.items()
@@ -43,9 +47,11 @@ def investigate(
     messages = [{"role": "user", "content": alert}]
     start = time.monotonic()
     total = 0
-    for step in range(8):
+    for step in range(max_requests):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Investigation latency budget exhausted")
         payload = {
-            "model": MODEL,
+            "model": model,
             "instructions": instructions + (RECOVERY if improved else ""),
             "input": messages,
             "tools": tools,
@@ -88,14 +94,14 @@ def investigate(
         messages.extend(o.model_dump(exclude_none=True) for o in response.output)
         calls = [o for o in response.output if o.type == "function_call"]
         if not calls:
-            diagnosis = Diagnosis.model_validate_json(response.output_text)
+            diagnosis = response_model.model_validate_json(response.output_text)
             return (
                 diagnosis,
                 trace,
                 {
                     "estimated_usd": round(total, 6),
                     "elapsed_ms": round((time.monotonic() - start) * 1000),
-                    "model": MODEL,
+                    "model": model,
                 },
             )
         for call in calls:

@@ -1,0 +1,38 @@
+{
+  "gpt-6.2-sol/basic-citations": {
+    "runs": 8,
+    "correct_cause": 8,
+    "supported": 8,
+    "within_limits": 8,
+    "errors": 0,
+    "median_ms": 7765.5,
+    "estimated_usd": 0.100656
+  },
+  "gpt-6.2-sol/check-support": {
+    "runs": 8,
+    "correct_cause": 8,
+    "supported": 8,
+    "within_limits": 8,
+    "errors": 0,
+    "median_ms": 7941.0,
+    "estimated_usd": 0.105876
+  },
+  "gpt-6-luna/basic-citations": {
+    "runs": 8,
+    "correct_cause": 8,
+    "supported": 3,
+    "within_limits": 8,
+    "errors": 0,
+    "median_ms": 6718.5,
+    "estimated_usd": 0.005799
+  },
+  "gpt-6-luna/check-support": {
+    "runs": 8,
+    "correct_cause": 8,
+    "supported": 4,
+    "within_limits": 8,
+    "errors": 0,
+    "median_ms": 6229.0,
+    "estimated_usd": 0.005839
+  }
+}

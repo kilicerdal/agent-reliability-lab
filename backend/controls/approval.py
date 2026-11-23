@@ -3,10 +3,16 @@
 import argparse
 import json
 import os
+import secrets
+import subprocess
 import sys
+from contextlib import contextmanager
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import psycopg
+from psycopg import sql
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.rows import dict_row
 
 from backend.lab.db import connect, init_db
@@ -24,14 +30,75 @@ def install():
             );
             DO $$ BEGIN
                 IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='lab_mcp') THEN
-                    CREATE ROLE lab_mcp LOGIN PASSWORD 'lab_mcp';
+                    CREATE ROLE lab_mcp NOLOGIN;
                 END IF;
             END $$;
+            ALTER ROLE lab_mcp NOLOGIN;
+            ALTER TABLE worker_restart_requests ADD COLUMN IF NOT EXISTS action text
+                NOT NULL DEFAULT 'restart_worker' CHECK (action = 'restart_worker');
             GRANT USAGE ON SCHEMA public TO lab_mcp;
             GRANT SELECT ON orders, observations TO lab_mcp;
             GRANT INSERT (experiment), SELECT (experiment, approved_at)
                 ON worker_restart_requests TO lab_mcp;
         """)
+        for table in ("orders", "observations", "worker_restart_requests"):
+            identifier = sql.Identifier(table)
+            conn.execute(
+                sql.SQL("ALTER TABLE {} ENABLE ROW LEVEL SECURITY").format(identifier)
+            )
+            conn.execute(
+                sql.SQL("DROP POLICY IF EXISTS scoped_mcp ON {}").format(identifier)
+            )
+            conn.execute(
+                sql.SQL("""
+                CREATE POLICY scoped_mcp ON {} TO lab_mcp
+                USING (session_user::text = 'lab_scope_' || replace(experiment, '-', ''))
+                WITH CHECK (session_user::text = 'lab_scope_' || replace(experiment, '-', ''))
+            """).format(identifier)
+            )
+        for table in ("orders", "observations"):
+            identifier = sql.Identifier(table)
+            conn.execute(
+                sql.SQL("DROP POLICY IF EXISTS historical_reader ON {}").format(
+                    identifier
+                )
+            )
+            conn.execute(
+                sql.SQL(
+                    "CREATE POLICY historical_reader ON {} FOR SELECT TO lab_reader USING (true)"
+                ).format(identifier)
+            )
+
+
+@contextmanager
+def scoped_mcp_dsn(experiment):
+    """Create a short-lived login for one trusted launcher session."""
+    identity = UUID(experiment)
+    role = "lab_scope_" + identity.hex
+    password = secrets.token_urlsafe(32)
+    expires = str(datetime.now(UTC) + timedelta(minutes=20))
+    owner_options = conninfo_to_dict(os.environ["LAB_DATABASE_URL"])
+    location = {
+        key: owner_options[key]
+        for key in ("host", "port", "dbname", "sslmode")
+        if key in owner_options
+    }
+    with connect() as conn:
+        exists = conn.execute(
+            "SELECT 1 FROM experiments WHERE id=%s", (str(identity),)
+        ).fetchone()
+        if not exists:
+            raise ValueError("Unknown experiment")
+        conn.execute(
+            sql.SQL(
+                "CREATE ROLE {} LOGIN IN ROLE lab_mcp PASSWORD {} VALID UNTIL {}"
+            ).format(sql.Identifier(role), sql.Literal(password), sql.Literal(expires))
+        )
+    try:
+        yield make_conninfo(user=role, password=password, **location)
+    finally:
+        with connect() as conn:
+            conn.execute(sql.SQL("DROP ROLE {}").format(sql.Identifier(role)))
 
 
 def request_restart(experiment):
@@ -60,7 +127,7 @@ def approve_restart(experiment):
         request = conn.execute(
             """SELECT approved_at IS NOT NULL AS applied,
                       requested_at + interval '15 minutes' <= now() AS expired
-               FROM worker_restart_requests WHERE experiment = %s FOR UPDATE""",
+               FROM worker_restart_requests WHERE experiment = %s AND action = 'restart_worker' FOR UPDATE""",
             (experiment,),
         ).fetchone()
         if request is None:
@@ -96,6 +163,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest="operation", required=True)
     subcommands.add_parser("install")
+    serve = subcommands.add_parser("serve")
+    serve.add_argument("experiment", type=UUID)
     approval = subcommands.add_parser("approve")
     approval.add_argument("experiment", type=UUID)
     args = parser.parse_args()
@@ -103,6 +172,14 @@ def main():
         install()
         return
     experiment = str(args.experiment)
+    if args.operation == "serve":
+        with scoped_mcp_dsn(experiment) as dsn:
+            result = subprocess.run(
+                [sys.executable, "-m", "backend.controls.server", experiment],
+                env={"LAB_MCP_DSN": dsn},
+                check=False,
+            )
+        raise SystemExit(result.returncode)
     print(
         f"Action: re-enable the synthetic worker for experiment {experiment}.",
         file=sys.stderr,

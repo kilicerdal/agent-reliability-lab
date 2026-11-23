@@ -10,6 +10,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 from psycopg import IntegrityError
+from psycopg.errors import InsufficientPrivilege
 
 from backend.lab.tools import TOOLS, dispatch
 
@@ -59,7 +60,7 @@ def build_server(experiment):
                 result = await anyio.to_thread.run_sync(
                     dispatch, params.name, {}, experiment
                 )
-        except IntegrityError:
+        except (IntegrityError, InsufficientPrivilege):
             return CallToolResult(
                 is_error=True,
                 content=[TextContent(type="text", text="Experiment unavailable.")],
