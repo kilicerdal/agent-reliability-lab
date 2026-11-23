@@ -11,6 +11,8 @@ Built by **Erdal Kilic** with AI assistance for implementation, tests and docume
 
 **V2 evaluation:** A recovery-guided prompt passed **23/24** held-out runs compared with **19/24** for the V1 prompt, using the same model and tool fixtures. [Read the evaluation report](docs/v2-evaluation.md) · [Inspect the scorecard](evidence/v2/summary.json)
 
+**V3 controls:** The local MCP tools are bound to one experiment. A separate operator confirmation enabled the worker once across concurrent retries, and the order completed once. [Read the V3 report](docs/v3-controls.md) · [Inspect the evidence](evidence/v3/)
+
 ![Working V1 dashboard showing captured investigations and independent outcomes](docs/assets/overview.png)
 
 [Full desktop capture](docs/assets/dashboard-1440.png) · [Mobile capture](docs/assets/dashboard-390.png)

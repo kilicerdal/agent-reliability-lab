@@ -18,6 +18,7 @@ jobs:
     env:
       LAB_DATABASE_URL: postgresql://lab:lab@127.0.0.1:5544/lab
       LAB_READER_DSN: postgresql://lab_reader:lab_reader@127.0.0.1:5544/lab
+      LAB_MCP_DSN: postgresql://lab_mcp:lab_mcp@127.0.0.1:5544/lab
       PYTHONPATH: backend
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -35,6 +36,7 @@ jobs:
       - run: pip install -r requirements.lock
       - run: python scripts/check-evidence.py
       - run: python -m backend.reliability.verify
+      - run: python -m backend.controls.verify
       - name: Start synthetic inventory
         run: |
           python -m uvicorn lab.inventory:app --host 127.0.0.1 --port 8811 > /tmp/inventory.log 2>&1 &

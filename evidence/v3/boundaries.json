@@ -1,0 +1,88 @@
+{
+  "scope": "synthetic PostgreSQL and HTTP inventory, MCP stdio, scripted operator confirmation",
+  "protocol": "2026-07-28",
+  "target": "f62b6ce8-c3c1-4c1a-a017-ac11f3d455dc",
+  "other_experiment": "0dd375af-cd81-4d1f-9ba3-6c3cc857caaa",
+  "tools": [
+    "read_logs",
+    "read_deployments",
+    "read_queue",
+    "read_health",
+    "request_worker_restart"
+  ],
+  "denied_mcp_calls": {
+    "read_logs:experiment": true,
+    "request_worker_restart:experiment": true,
+    "request_worker_restart:approved": true,
+    "approve_worker_restart:": true
+  },
+  "denied_database_sqlstates": {
+    "update_worker": "42501",
+    "forge_approval": "42501"
+  },
+  "approvals_without_request": "no_request",
+  "requested": {
+    "request_id": "f62b6ce8-c3c1-4c1a-a017-ac11f3d455dc",
+    "status": "pending_operator_review"
+  },
+  "request_retry": {
+    "request_id": "f62b6ce8-c3c1-4c1a-a017-ac11f3d455dc",
+    "status": "pending_operator_review"
+  },
+  "wrong_confirmation_exit": 2,
+  "concurrent_results": [
+    "already_applied",
+    "applied"
+  ],
+  "expired_result": "expired",
+  "after_apply_retry": {
+    "request_id": "f62b6ce8-c3c1-4c1a-a017-ac11f3d455dc",
+    "status": "applied"
+  },
+  "states": {
+    "before_request": {
+      "worker_enabled": false,
+      "order_status": "queued",
+      "restart_events": 0,
+      "completion_events": 0
+    },
+    "pending": {
+      "worker_enabled": false,
+      "order_status": "queued",
+      "restart_events": 0,
+      "completion_events": 0
+    },
+    "after_wrong_confirmation": {
+      "worker_enabled": false,
+      "order_status": "queued",
+      "restart_events": 0,
+      "completion_events": 0
+    },
+    "after_approval": {
+      "worker_enabled": true,
+      "order_status": "queued",
+      "restart_events": 1,
+      "completion_events": 0
+    },
+    "after_two_ticks": {
+      "worker_enabled": true,
+      "order_status": "completed",
+      "restart_events": 1,
+      "completion_events": 1
+    }
+  },
+  "checks": {
+    "approval_tool_absent": true,
+    "scope_enforced": true,
+    "no_write_privilege": true,
+    "no_approval_without_request": true,
+    "request_retry_idempotent": true,
+    "worker_unchanged_pending": true,
+    "incorrect_confirmation_denied": true,
+    "concurrent_approval_applies_once": true,
+    "worker_completed_order_once": true,
+    "post_approval_request_retry": true,
+    "request_expired": true,
+    "other_experiment_unchanged": true
+  }
+}
