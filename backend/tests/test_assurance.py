@@ -8,7 +8,10 @@ from backend.reliability.assurance import (
     ClaimCitation,
     EvidenceJudgment,
     SupportedDiagnosis,
+    apply_citation_review,
+    check_citations,
     grade_claims,
+    observed_records,
 )
 from backend.reliability.blind_intake import dispatch_observations, load_suite
 from backend.reliability.live_challenges import LiveChallenge
@@ -136,6 +139,112 @@ def test_citation_support_rejects_observed_but_inadequate_evidence():
         report = grade_claims(result, "db_latency", trace, rubric)
         assert report["cause_correct"] and not report["passed"]
         assert report["claims"][0]["verdict"] == verdict
+
+
+@pytest.mark.parametrize(
+    ("defect", "structural_pass", "support_pass"),
+    [
+        ("control", True, True),
+        ("backlog_symptom", True, False),
+        ("stale_setting", True, False),
+        ("omitted_clause", True, False),
+        ("wrong_claim_role", True, False),
+        ("invented_quote", False, False),
+        ("unseen_id", False, False),
+        ("unlisted_id", False, False),
+        ("extra_unseen_id", False, False),
+        ("conflicting_id", False, False),
+        ("missing_role", False, False),
+    ],
+)
+def test_citation_defect_replay(defect, structural_pass, support_pass):
+    backlog = "The queue grew from 10 to 90 pending orders."
+    old_setting = "Yesterday's setting enabled a SQL delay with no current snapshot."
+    records = {
+        "obs-1": WORKLOAD,
+        "obs-2": CONFIG,
+        "obs-3": backlog,
+        "obs-4": old_setting,
+    }
+    trace = [
+        {
+            "type": "tool",
+            "ok": True,
+            "result": {
+                "records": [
+                    {"evidence_id": key, "detail": detail}
+                    for key, detail in records.items()
+                ]
+            },
+        }
+    ]
+    if defect == "conflicting_id":
+        trace.append(
+            {
+                "type": "tool",
+                "ok": True,
+                "result": {
+                    "records": [
+                        {
+                            "evidence_id": "obs-1",
+                            "detail": "PostgreSQL showed no delay.",
+                        }
+                    ]
+                },
+            }
+        )
+    rubric = [
+        EvidenceJudgment(
+            kind="mechanism",
+            evidence_id="obs-1",
+            verdict="supports",
+            required_excerpt="PostgreSQL waited 900 ms",
+        ),
+        EvidenceJudgment(kind="configuration", evidence_id="obs-2", verdict="supports"),
+        EvidenceJudgment(kind="mechanism", evidence_id="obs-3", verdict="irrelevant"),
+        EvidenceJudgment(
+            kind="configuration", evidence_id="obs-4", verdict="irrelevant"
+        ),
+        EvidenceJudgment(kind="mechanism", evidence_id="obs-2", verdict="irrelevant"),
+    ]
+    result = diagnosis()
+    replacements = {
+        "backlog_symptom": ("mechanism", "obs-3", backlog),
+        "stale_setting": ("configuration", "obs-4", old_setting),
+        "omitted_clause": ("mechanism", "obs-1", "inventory remained healthy"),
+        "wrong_claim_role": ("mechanism", "obs-2", CONFIG),
+        "invented_quote": ("mechanism", "obs-1", "PostgreSQL waited 400 ms"),
+        "unseen_id": ("mechanism", "obs-42", WORKLOAD),
+        "missing_role": ("configuration", "obs-2", CONFIG),
+    }
+    if defect in replacements:
+        kind, evidence_id, quote = replacements[defect]
+        index = int(defect == "stale_setting")
+        result.claims[index] = ClaimCitation(
+            kind=kind, evidence_id=evidence_id, quote=quote
+        )
+        result.evidence_ids[index] = evidence_id
+    if defect == "unlisted_id":
+        result.evidence_ids.remove("obs-1")
+    if defect == "extra_unseen_id":
+        result.evidence_ids.append("obs-42")
+    observed, inconsistent = observed_records(trace)
+    checks = check_citations(result, observed, inconsistent)
+    report = grade_claims(result, "db_latency", trace, rubric)
+    assert checks["passed"] is structural_pass
+    assert report["cause_correct"] and report["passed"] is support_pass
+
+    # Replay an explicit replacement proposal without sending a model request.
+    safe_records = {
+        key: detail for key, detail in observed.items() if key not in inconsistent
+    }
+    proposal = CitationReview(claims=diagnosis().claims)
+    repaired = apply_citation_review(result, proposal, safe_records)
+    if defect == "conflicting_id":
+        assert repaired is None
+    else:
+        assert repaired.cause == result.cause
+        assert grade_claims(repaired, "db_latency", trace, rubric)["passed"]
 
 
 def test_blind_intake_separates_payload_from_answer_key(tmp_path):

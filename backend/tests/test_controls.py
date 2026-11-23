@@ -1,7 +1,11 @@
 import anyio
+import pytest
 
-from backend.controls.evidence import capture
+from backend.controls import approval
+from backend.controls.evidence import capture, restart_outcome, state
 from backend.controls.server import CATALOG, REQUEST
+from backend.lab.db import connect
+from backend.lab.sandbox import reproduce, tick
 
 
 def test_catalog_has_only_scoped_tools():
@@ -22,3 +26,51 @@ def test_catalog_has_only_scoped_tools():
 def test_mcp_scope_and_operator_approval(database):
     result = anyio.run(capture)
     assert all(result["checks"].values()), result["checks"]
+
+
+def test_approval_rolls_back_mid_execution_and_detects_persistent_incident(
+    database, monkeypatch
+):
+    approval.install()
+    experiment = reproduce("worker-failure")
+    before = state(experiment)
+    with approval.scoped_mcp_dsn(experiment) as dsn:
+        monkeypatch.setenv("LAB_READER_DSN", dsn)
+        assert (
+            approval.request_restart(experiment)["status"] == "pending_operator_review"
+        )
+    real_record = approval.record
+
+    def interrupt(*args):
+        raise RuntimeError("Interrupted before audit event")
+
+    monkeypatch.setattr(approval, "record", interrupt)
+    with pytest.raises(RuntimeError, match="Interrupted"):
+        approval.approve_restart(experiment)
+    assert state(experiment) == before
+    monkeypatch.setattr(approval, "record", real_record)
+    assert approval.approve_restart(experiment) == "applied"
+    assert approval.approve_restart(experiment) == "already_applied"
+    with connect() as conn:
+        conn.execute(
+            "UPDATE experiments SET inventory_mode='wrong-region' WHERE id=%s",
+            (experiment,),
+        )
+    tick(experiment)
+    assert restart_outcome(before, state(experiment)) == {
+        "action_applied": True,
+        "workload_recovered": False,
+        "order_status": "queued",
+    }
+    with connect() as conn:
+        conn.execute(
+            "UPDATE experiments SET inventory_mode='healthy' WHERE id=%s", (experiment,)
+        )
+    tick(experiment)
+    tick(experiment)
+    assert restart_outcome(before, state(experiment))["workload_recovered"]
+    assert (
+        state(experiment)["restart_events"]
+        == state(experiment)["completion_events"]
+        == 1
+    )

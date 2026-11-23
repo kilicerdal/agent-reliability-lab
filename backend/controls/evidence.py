@@ -47,6 +47,23 @@ def state(experiment):
         ).fetchone()
 
 
+def restart_outcome(before, after):
+    applied = (
+        after["worker_enabled"] and after["restart_events"] > before["restart_events"]
+    )
+    recovered = (
+        applied
+        and before["order_status"] == "queued"
+        and after["order_status"] == "completed"
+        and after["completion_events"] > before["completion_events"]
+    )
+    return {
+        "action_applied": applied,
+        "workload_recovered": recovered,
+        "order_status": after["order_status"],
+    }
+
+
 def operator_cli(experiment, answer):
     return subprocess.run(
         [sys.executable, "-m", "backend.controls.approval", "approve", experiment],
@@ -202,6 +219,7 @@ async def capture():
             "after_approval": enabled,
             "after_two_ticks": completed,
         },
+        "remediation_outcome": restart_outcome(initial, completed),
         "checks": checks,
     }
 

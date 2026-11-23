@@ -1,10 +1,11 @@
 """Compare model and citation prompts on the same isolated recovery cases."""
 
 import argparse
+import fcntl
 import json
+import os
 import time
 from collections import defaultdict
-from functools import partial
 from pathlib import Path
 from statistics import median
 
@@ -22,10 +23,12 @@ from .assurance import (
     CitationReview,
     SupportedDiagnosis,
     apply_citation_review,
+    check_citations,
     grade_claims,
     observed_records,
 )
-from .blind_intake import dispatch_observations, load_suite
+from .blind_intake import incident_dispatch, load_suite
+from .incident_quality import check_explanation, current_records, evidence_decision
 from .live_challenges import SCENARIOS, LiveChallenge
 
 RATES = {MODEL: (2, 10), "gpt-6-luna": (0.1, 0.5)}
@@ -57,7 +60,7 @@ REVIEW_CITATIONS = (
 )
 
 
-def run_once(client, model, prompt, alert, tools, answer, rubric):
+def run_once(client, model, prompt, alert, tools, answer, rubric, *, incident=None):
     trace = []
     diagnosis = None
     error = None
@@ -66,9 +69,28 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
     initial_elapsed_ms = None
     review_proposal = None
     review_triggers = []
-    verified = prompt == "verify-citations"
+    verified = prompt in {"verify-citations", "selective-citations"}
     start = time.monotonic()
     budget = Budget(rates=RATES[model])
+    quality = None
+    followup_tool = None
+    followup_initial_cause = None
+
+    def choose_followup(initial, events):
+        nonlocal followup_tool, followup_initial_cause
+        report = evidence_decision(
+            incident, initial, records=current_records(incident, events)
+        )
+        handoff = report["handoff"]
+        if handoff and handoff["next_tool"] not in {
+            event.get("name") for event in events if event["type"] == "tool"
+        }:
+            followup_tool = handoff["next_tool"]
+            followup_initial_cause = initial.cause
+        return followup_tool
+
+    if incident and incident.window:
+        alert = f"{alert}\nIncident scope: {incident.window.model_dump_json()}"
     try:
         diagnosis, _, _ = investigate(
             alert,
@@ -81,6 +103,7 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
             model=model,
             deadline=start + LATENCY_LIMIT,
             max_requests=6,
+            followup=choose_followup if incident and incident.window else None,
             instructions=PROMPT
             + CITATION_INSTRUCTIONS
             + (CHECK_SUPPORT if prompt != "basic-citations" else ""),
@@ -90,17 +113,11 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
             initial_elapsed_ms = round((time.monotonic() - start) * 1000)
             review_status = "unavailable"
             observed, inconsistent = observed_records(trace)
+            checks = check_citations(diagnosis, observed, inconsistent)
             records = {
                 key: text for key, text in observed.items() if key not in inconsistent
             }
-            if {claim.kind for claim in diagnosis.claims} != {
-                "mechanism",
-                "configuration",
-            } or any(
-                claim.evidence_id not in diagnosis.evidence_ids
-                or claim.quote not in records.get(claim.evidence_id, "")
-                for claim in diagnosis.claims
-            ):
+            if not checks["passed"]:
                 review_triggers.append("incomplete_or_invalid_citation")
             if inconsistent or any(
                 any(
@@ -121,6 +138,9 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
                 for event in trace
             ):
                 review_triggers.append("tool_error")
+            if prompt == "selective-citations" and not review_triggers:
+                review_status = "skipped"
+        if verified and review_status == "unavailable":
             review_trace = []
             try:
                 review, _, _ = investigate(
@@ -166,11 +186,25 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
     elapsed = time.monotonic() - start
     cost = round(sum(event.get("estimated_usd", 0) for event in trace), 6)
     verdict = grade_claims(diagnosis, answer, trace, rubric)
-    if verified and review_status != "accepted":
+    if incident and incident.window:
+        quality = {
+            "rules_baseline": evidence_decision(
+                incident, records=current_records(incident, trace)
+            ),
+            "followup_tool": followup_tool,
+            "followup_initial_cause": followup_initial_cause,
+            "diagnosis": evidence_decision(
+                incident, diagnosis, records=current_records(incident, trace)
+            )
+            if diagnosis
+            else None,
+        }
+    if verified and review_status not in {"accepted", "skipped"}:
         verdict["passed"] = False
     return {
         "model": model,
         "prompt": prompt,
+        **({"evidence_quality": quality} if quality is not None else {}),
         **(
             {
                 "citation_review": review_status,
@@ -262,7 +296,16 @@ def summarize_review_policies(rows):
 
 
 def run_suite(
-    client, output, cases, repeats, *, live, citation_review=False, paired=False
+    client,
+    output,
+    cases,
+    repeats,
+    *,
+    live,
+    citation_review=False,
+    paired=False,
+    resume=False,
+    selective=False,
 ):
     rows = []
     prompts = (
@@ -273,7 +316,37 @@ def run_suite(
     arms = [(model, prompt) for model in RATES for prompt in prompts]
     if paired:
         arms = [(model, "verify-citations") for model in RATES]
-    with (output / "runs.jsonl").open("x") as log:
+    if selective:
+        arms = [
+            (model, prompt)
+            for model in RATES
+            for prompt in ("check-support", "selective-citations")
+        ]
+    log_path = output / "runs.jsonl"
+    marker = output / "in-flight.json"
+    completed = set()
+    if resume and log_path.exists():
+        rows = [json.loads(line) for line in log_path.read_text().splitlines()]
+        valid = {
+            (incident.id, repeat, model, prompt)
+            for incident, _ in cases
+            for repeat in range(1, repeats + 1)
+            for model, prompt in arms
+        }
+        completed = {
+            (row["incident"], row["repeat"], row["model"], row["prompt"])
+            for row in rows
+        }
+        if len(completed) != len(rows) or not completed <= valid:
+            raise ValueError("Cannot resume with duplicate or unexpected trials")
+    if marker.exists():
+        pending = tuple(json.loads(marker.read_text()))
+        if pending not in completed:
+            raise ValueError(
+                "An interrupted trial has uncertain API usage; reconcile it before resuming"
+            )
+        marker.unlink()
+    with log_path.open("a" if resume else "x") as log:
         for repeat in range(1, repeats + 1):
             for index, case in enumerate(cases):
                 for model, support in arms if (index + repeat) % 2 else reversed(arms):
@@ -288,18 +361,42 @@ def run_suite(
                         )
                     else:
                         incident, review = case
-                        tools = partial(dispatch_observations, incident)
+                        tools = incident_dispatch(incident)
                         alert, answer, rubric, name = (
                             incident.alert,
                             review.cause,
                             review.judgments,
                             incident.id,
                         )
-                    row = run_once(client, model, support, alert, tools, answer, rubric)
+                    trial = (name, repeat, model, support)
+                    if trial in completed:
+                        continue
+                    with marker.open("x") as pending:
+                        json.dump(trial, pending)
+                        pending.flush()
+                        os.fsync(pending.fileno())
+                    row = run_once(
+                        client,
+                        model,
+                        support,
+                        alert,
+                        tools,
+                        answer,
+                        rubric,
+                        incident=None if live else incident,
+                    )
                     if live:
                         row["injected_timeouts_observed"] = events
                         row["unchanged_workload"] = before == fingerprint(
                             case.experiment
+                        )
+                    elif review.unsupported_phrases:
+                        diagnosis = row["diagnosis"]
+                        row["explanation_check"] = check_explanation(
+                            SupportedDiagnosis.model_validate(diagnosis)
+                            if diagnosis
+                            else None,
+                            review.unsupported_phrases,
                         )
                     row.update(
                         incident=name,
@@ -309,6 +406,8 @@ def run_suite(
                     rows.append(row)
                     log.write(json.dumps(row) + "\n")
                     log.flush()
+                    os.fsync(log.fileno())
+                    marker.unlink()
                     print(
                         name,
                         repeat,
@@ -328,10 +427,14 @@ def main():
     parser.add_argument("--cases", type=Path)
     parser.add_argument("--key", type=Path)
     parser.add_argument("--sealed", type=Path)
+    parser.add_argument(
+        "--resume", action="store_true", help="Resume a sealed external run"
+    )
     parser.add_argument("--repeats", type=int, choices=(1, 2, 3), default=2)
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--citation-review", action="store_true")
     modes.add_argument("--paired-citation-review", action="store_true")
+    modes.add_argument("--live-selective-citation-review", action="store_true")
     args = parser.parse_args()
     intake = (args.cases, args.key, args.sealed)
     if any(intake) and not all(intake):
@@ -339,6 +442,8 @@ def main():
     if args.env_file:
         load_dotenv(args.env_file, override=False)
     external = args.cases is not None
+    if args.resume and not external:
+        parser.error("Only sealed external runs can resume")
     if external:
         observations, key, manifest = load_suite(args.cases, args.key)
         if json.loads(args.sealed.read_text()) != manifest:
@@ -351,40 +456,55 @@ def main():
         cases = [LiveChallenge(name) for name in SCENARIOS]
         manifest = {case.name: fingerprint(case.experiment) for case in cases}
     args.output.mkdir(parents=True, exist_ok=True)
-    with (args.output / "manifest.json").open("x") as output:
-        json.dump(
-            {
-                "suite": manifest,
-                "repeats": args.repeats,
-                "citation_review": args.citation_review,
-                "paired_citation_review": args.paired_citation_review,
-                "rates_per_million": RATES,
-                "limits": {
-                    "elapsed_seconds": LATENCY_LIMIT,
-                    "estimated_usd": COST_LIMIT,
-                },
-            },
-            output,
-            indent=2,
+    run_manifest = {
+        "suite": manifest,
+        "repeats": args.repeats,
+        "citation_review": args.citation_review,
+        "paired_citation_review": args.paired_citation_review,
+        "live_selective_citation_review": args.live_selective_citation_review,
+        "rates_per_million": RATES,
+        "limits": {
+            "elapsed_seconds": LATENCY_LIMIT,
+            "estimated_usd": COST_LIMIT,
+        },
+    }
+    with (args.output / ".run.lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            parser.error("Another benchmark is using this output directory")
+        manifest_path = args.output / "manifest.json"
+        if args.resume:
+            if json.loads(manifest_path.read_text()) != json.loads(
+                json.dumps(run_manifest)
+            ):
+                parser.error("Run configuration changed since the original capture")
+        else:
+            with manifest_path.open("x") as output:
+                json.dump(run_manifest, output, indent=2)
+        rows = run_suite(
+            OpenAI(max_retries=0, timeout=10),
+            args.output,
+            cases,
+            args.repeats,
+            live=not external,
+            citation_review=args.citation_review,
+            paired=args.paired_citation_review,
+            resume=args.resume,
+            selective=args.live_selective_citation_review,
         )
-    rows = run_suite(
-        OpenAI(max_retries=0, timeout=10),
-        args.output,
-        cases,
-        args.repeats,
-        live=not external,
-        citation_review=args.citation_review,
-        paired=args.paired_citation_review,
-    )
-    (args.output / "summary.json").write_text(
-        json.dumps(
-            summarize_review_policies(rows)
-            if args.paired_citation_review
-            else summarize(rows),
-            indent=2,
+        summary_path = args.output / "summary.json"
+        temporary = summary_path.with_suffix(".tmp")
+        temporary.write_text(
+            json.dumps(
+                summarize_review_policies(rows)
+                if args.paired_citation_review
+                else summarize(rows),
+                indent=2,
+            )
+            + "\n"
         )
-        + "\n"
-    )
+        temporary.replace(summary_path)
 
 
 if __name__ == "__main__":

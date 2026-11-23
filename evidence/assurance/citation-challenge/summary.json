@@ -1,0 +1,16 @@
+{
+  "gpt-6.2-sol": {
+    "repairs": 2,
+    "lost_support": 0,
+    "unsupported_accepts": 0,
+    "trials": 3,
+    "estimated_usd": 0.006436
+  },
+  "gpt-6-luna": {
+    "repairs": 2,
+    "lost_support": 0,
+    "unsupported_accepts": 0,
+    "trials": 3,
+    "estimated_usd": 0.00031
+  }
+}

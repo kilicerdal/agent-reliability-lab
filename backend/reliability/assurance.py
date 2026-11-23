@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from backend.lab.contracts import Diagnosis
 
 ClaimKind = Literal["mechanism", "configuration"]
+CLAIM_KINDS = {"mechanism", "configuration"}
 
 
 class ClaimCitation(BaseModel):
@@ -51,14 +52,33 @@ def observed_records(trace):
     return observed, inconsistent
 
 
+def check_citations(diagnosis, observed, inconsistent):
+    """Check citation structure against observed records without a grading key."""
+    citations = set(diagnosis.evidence_ids)
+    claim_errors = []
+    for claim in diagnosis.claims:
+        detail = observed.get(claim.evidence_id)
+        error = None
+        if detail is None or claim.evidence_id not in citations:
+            error = "unobserved"
+        elif claim.evidence_id in inconsistent:
+            error = "inconsistent_record"
+        elif claim.quote not in detail:
+            error = "quotation_mismatch"
+        claim_errors.append(error)
+    issues = {
+        "claim_errors": claim_errors,
+        "unobserved_ids": sorted(citations - observed.keys()),
+        "inconsistent_ids": sorted(citations & inconsistent),
+        "missing_roles": sorted(
+            CLAIM_KINDS - {claim.kind for claim in diagnosis.claims}
+        ),
+    }
+    return {**issues, "passed": not any(any(items) for items in issues.values())}
+
+
 def apply_citation_review(diagnosis, review, records):
-    if {claim.kind for claim in review.claims} != {"mechanism", "configuration"}:
-        return None
-    if any(
-        claim.quote not in records.get(claim.evidence_id, "") for claim in review.claims
-    ):
-        return None
-    return diagnosis.model_copy(
+    revised = diagnosis.model_copy(
         update={
             "claims": review.claims,
             "evidence_ids": list(
@@ -66,6 +86,8 @@ def apply_citation_review(diagnosis, review, records):
             ),
         }
     )
+    checks = check_citations(revised, records, set())
+    return revised if checks["passed"] else None
 
 
 def grade_claims(diagnosis, expected_cause, trace, rubric):
@@ -74,18 +96,11 @@ def grade_claims(diagnosis, expected_cause, trace, rubric):
         return {"cause_correct": False, "passed": False, "claims": []}
 
     observed, inconsistent = observed_records(trace)
-    citations = set(diagnosis.evidence_ids)
+    checks = check_citations(diagnosis, observed, inconsistent)
     reviewed = {(row.kind, row.evidence_id): row for row in rubric}
     claims = []
-    for claim in diagnosis.claims:
-        detail = observed.get(claim.evidence_id)
-        if detail is None or claim.evidence_id not in citations:
-            verdict = "unobserved"
-        elif claim.evidence_id in inconsistent:
-            verdict = "inconsistent_record"
-        elif claim.quote not in detail:
-            verdict = "quotation_mismatch"
-        else:
+    for claim, verdict in zip(diagnosis.claims, checks["claim_errors"], strict=True):
+        if verdict is None:
             judgment = reviewed.get((claim.kind, claim.evidence_id))
             if judgment is None:
                 verdict = "unreviewed"
@@ -101,9 +116,8 @@ def grade_claims(diagnosis, expected_cause, trace, rubric):
     return {
         "cause_correct": cause_correct,
         "passed": cause_correct
-        and set(observed) >= citations
+        and checks["passed"]
         and all(item["verdict"] == "supports" for item in claims)
-        and {item["kind"] for item in claims} == {"mechanism", "configuration"}
         and not any(event["type"] == "tool" and not event.get("ok") for event in trace),
         "claims": claims,
     }

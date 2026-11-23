@@ -277,3 +277,33 @@ test("the export includes the complete downloadable evidence", async ({
   expect(recoveryTraces.trim().split("\n")).toHaveLength(32);
   expect(JSON.parse(scopedApproval).checks.database_identity_scoped).toBe(true);
 });
+
+test("paired citations and the grading exercise replay recorded evidence", async ({
+  page,
+  baseURL,
+}) => {
+  const unexpected: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() !== "GET" ||
+      !request.url().startsWith(`${baseURL}/`) ||
+      new URL(request.url()).pathname.startsWith("/api/")
+    )
+      unexpected.push(request.url());
+  });
+  await page.goto("/#paired-citations", { waitUntil: "networkidle" });
+  const section = page.locator("#paired-citations");
+  await expect(section.getByRole("table").locator("tbody tr")).toHaveCount(6);
+  await section.getByLabel("Recorded trial").selectOption({ index: 1 });
+  await expect(
+    section.getByRole("heading", { name: "Before review · Supported" }),
+  ).toBeVisible();
+  await expect(
+    section.getByRole("heading", { name: "After review · Supported" }),
+  ).toBeVisible();
+  await section.locator('a[href^="#paired-source-"]').first().click();
+  await expect(page).toHaveURL(/#paired-source-/);
+  await section.getByRole("button", { name: "Insufficient support" }).click();
+  await expect(section.getByRole("status")).toContainText("Correct");
+  expect(unexpected).toEqual([]);
+});

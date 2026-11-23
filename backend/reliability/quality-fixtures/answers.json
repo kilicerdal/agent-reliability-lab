@@ -1,0 +1,364 @@
+[
+  {
+    "id": "counterfactual-confirmed",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-5",
+        "verdict": "supports",
+        "required_excerpt": "No consumer heartbeat or job start occurred for accepted parcels"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-3",
+        "verdict": "supports",
+        "required_excerpt": "Current effective worker count is zero"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "counterfactual-unresolved",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-5",
+        "verdict": "supports",
+        "required_excerpt": "No consumer heartbeat or job start occurred for accepted parcels"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-3",
+        "verdict": "supports",
+        "required_excerpt": "No effective worker setting was retained for this interval"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "compound-deploy-feed",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-1",
+        "verdict": "supports",
+        "required_excerpt": "The parcel upstream returned 404 for every request to the retired endpoint"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-11",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-1",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-11",
+        "verdict": "supports",
+        "required_excerpt": "Effective upstream routing sends parcels to the retired endpoint"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "partial-lock",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-8",
+        "verdict": "supports",
+        "required_excerpt": "Current request traces spent 980 milliseconds in the SQL lock wait"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-8",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-7",
+        "verdict": "supports",
+        "required_excerpt": "The current migration holds the lock on the lookup table"
+      }
+    ]
+  },
+  {
+    "id": "timeout-healthy",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-2",
+        "verdict": "supports",
+        "required_excerpt": "Current queue drains within target and the parcel workload succeeds"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-4",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-2",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-4",
+        "verdict": "supports",
+        "required_excerpt": "Effective settings match the verified healthy baseline"
+      }
+    ]
+  },
+  {
+    "id": "malformed-fallback",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-5",
+        "verdict": "supports",
+        "required_excerpt": "No consumer heartbeat or job start occurred for accepted parcels"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-3",
+        "verdict": "supports",
+        "required_excerpt": "Current effective worker count is zero"
+      }
+    ]
+  },
+  {
+    "id": "overlapping-faults",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-8",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-12",
+        "verdict": "supports",
+        "required_excerpt": "Current timing cannot establish whether SQL locking or worker inactivity preceded the backlog"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-13",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-8",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-12",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-13",
+        "verdict": "supports",
+        "required_excerpt": "Both changes overlap and effective ordering is unavailable"
+      }
+    ]
+  },
+  {
+    "id": "empty-with-stale-worker",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "unsupported_phrases": [
+      "the worker restarted at 09:33",
+      "the queue has been drained",
+      "the configuration was rolled back"
+    ],
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-8",
+        "verdict": "supports",
+        "required_excerpt": "Current request traces spent 980 milliseconds in the SQL lock wait"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "n-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-8",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-9",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "n-7",
+        "verdict": "supports",
+        "required_excerpt": "The current migration holds the lock on the lookup table"
+      }
+    ]
+  }
+]
