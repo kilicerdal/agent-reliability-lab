@@ -1,0 +1,169 @@
+{
+  "source_digest": "2f2390c985e42782a05a48268678d4d6039d3033adfb5122bd82978f806202e7",
+  "runtime": {
+    "python": "3.13.18",
+    "openai_sdk": "3.57.0"
+  },
+  "workload_fingerprints": {
+    "before": "a351f82d700f668b7304b4abd91ebd0a45b7a7e200c00fbe51be7e841ad936be",
+    "after": "a351f82d700f668b7304b4abd91ebd0a45b7a7e200c00fbe51be7e841ad936be"
+  },
+  "id": "91283aa1-ba9b-406d-b5cb-321e052d2d10",
+  "recorded_at": "2026-11-23T00:38:49.395188+00:00",
+  "scenario": "database-slowdown",
+  "experiment": "4ae0ad13-9cc3-47e8-b4dd-387b14bd1262",
+  "mode": "live-model / real local workload",
+  "diagnosis": {
+    "cause": "db_latency",
+    "explanation": "The PostgreSQL order lookup took 196.37 ms, exceeding the 100 ms threshold. Release 1.1 changed the query delay setting to 180 ms, which alone exceeds the threshold and accounts for most of the measured lookup time.",
+    "evidence_ids": [
+      "obs-195",
+      "obs-196",
+      "obs-197",
+      "obs-198",
+      "obs-199",
+      "obs-200",
+      "obs-201"
+    ],
+    "alternative": "A stopped worker or inventory dependency issue is less likely: the worker was enabled and polling, and an order completed after a successful inventory response.",
+    "next_check": "Compare existing lookup timings before and after the configuration change to confirm the expected latency increase and check for any additional database slowdown."
+  },
+  "trace": [
+    {
+      "type": "model",
+      "step": 0,
+      "response_id": "resp_08df41db5f622f25016b038b13f86887d28058ad1dd4fb5412",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 505,
+      "output_tokens": 14,
+      "estimated_usd": 0.00115,
+      "elapsed_ms": 1542
+    },
+    {
+      "type": "tool",
+      "name": "read_logs",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-195",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-196",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0.18 seconds"
+          },
+          {
+            "evidence_id": "obs-197",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is True"
+          },
+          {
+            "evidence_id": "obs-198",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is healthy"
+          },
+          {
+            "evidence_id": "obs-199",
+            "service": "worker",
+            "signal": "worker_heartbeat",
+            "detail": "Background worker polling queued orders"
+          },
+          {
+            "evidence_id": "obs-200",
+            "service": "worker",
+            "signal": "order_completed",
+            "detail": "1 orders completed after successful inventory response"
+          },
+          {
+            "evidence_id": "obs-201",
+            "service": "database",
+            "signal": "query_slow",
+            "detail": "Actual PostgreSQL order lookup: 196.37 ms; 1 rows"
+          }
+        ]
+      },
+      "elapsed_ms": 1547
+    },
+    {
+      "type": "model",
+      "step": 1,
+      "response_id": "resp_08df41db5f622f25016b038b155c9887d285ecb0bb88348d13",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 798,
+      "output_tokens": 16,
+      "estimated_usd": 0.001756,
+      "elapsed_ms": 2699
+    },
+    {
+      "type": "tool",
+      "name": "read_deployments",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-195",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-196",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0.18 seconds"
+          },
+          {
+            "evidence_id": "obs-197",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is True"
+          },
+          {
+            "evidence_id": "obs-198",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is healthy"
+          }
+        ]
+      },
+      "elapsed_ms": 2703
+    },
+    {
+      "type": "model",
+      "step": 2,
+      "response_id": "resp_08df41db5f622f25016b038b167f4c87d2998126fe195ecfb7",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 982,
+      "output_tokens": 177,
+      "estimated_usd": 0.003734,
+      "elapsed_ms": 5707
+    }
+  ],
+  "usage": {
+    "estimated_usd": 0.00664,
+    "elapsed_ms": 5707,
+    "model": "gpt-6.2-sol"
+  },
+  "verdict": {
+    "passed": true,
+    "checks": {
+      "correct_cause": true,
+      "citations_observed": true,
+      "required_signals_cited": true,
+      "workload_unchanged": true,
+      "no_denied_tools": true
+    },
+    "expected_cause": "db_latency",
+    "limitation": "Checks citation existence and required signal coverage; does not prove every natural-language claim. Development scenarios, not a held-out benchmark."
+  },
+  "scope": "Synthetic local PostgreSQL, worker and HTTP dependency; no production systems. Oracle is separate from agent tools, not a security-isolated process."
+}

@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab
+      POSTGRES_DB: lab
+    ports: ["127.0.0.1:5544:5432"]
+    volumes: ["lab-db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d lab"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+  inventory:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "-m", "uvicorn", "lab.inventory:app", "--host", "0.0.0.0", "--port", "8811"]
+    ports: ["127.0.0.1:8811:8811"]
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports: ["127.0.0.1:8810:8810"]
+    volumes: ["./evidence/runs:/app/evidence/runs:ro"]
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    ports: ["127.0.0.1:3310:3310"]
+    depends_on: [api]
+  runner:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "-m", "lab.run", "database-slowdown"]
+    environment:
+      LAB_DATABASE_URL: postgresql://lab:lab@db:5432/lab
+      LAB_READER_DSN: postgresql://lab_reader:lab_reader@db:5432/lab
+      LAB_INVENTORY_URL: http://inventory:8811
+      LAB_BUDGET_FILE: /app/.private/budget.sqlite
+    volumes:
+      - ./evidence/runs:/app/evidence/runs
+      - ./.private:/app/.private
+    depends_on:
+      db: {condition: service_healthy}
+      inventory: {condition: service_started}
+volumes:
+  lab-db:

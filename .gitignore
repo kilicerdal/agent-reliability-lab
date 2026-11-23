@@ -1,0 +1,11 @@
+.venv/
+.env*
+!.env.example
+.private/
+__pycache__/
+.pytest_cache/
+*.pyc
+node_modules/
+.next/
+artifacts/
+test-results/

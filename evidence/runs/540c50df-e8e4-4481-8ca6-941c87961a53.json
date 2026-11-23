@@ -1,0 +1,161 @@
+{
+  "source_digest": "2f2390c985e42782a05a48268678d4d6039d3033adfb5122bd82978f806202e7",
+  "runtime": {
+    "python": "3.13.18",
+    "openai_sdk": "3.57.0"
+  },
+  "workload_fingerprints": {
+    "before": "83f04e57bfcc450bddaf0caf85630b9e3401e641d38b629d94eb6af6dc07c952",
+    "after": "83f04e57bfcc450bddaf0caf85630b9e3401e641d38b629d94eb6af6dc07c952"
+  },
+  "id": "540c50df-e8e4-4481-8ca6-941c87961a53",
+  "recorded_at": "2026-11-23T00:38:55.811029+00:00",
+  "scenario": "worker-failure",
+  "experiment": "150df36f-4f84-4104-9fdb-31420f2d0b88",
+  "mode": "live-model / real local workload",
+  "diagnosis": {
+    "cause": "worker_stopped",
+    "explanation": "The worker was configured with enabled=False, and workload logs confirm it was not running while one accepted order remained queued. The API could still accept orders, but the disabled worker was not available to process them.",
+    "evidence_ids": [
+      "obs-204",
+      "obs-206",
+      "obs-203",
+      "obs-207",
+      "obs-205"
+    ],
+    "alternative": "Database latency is less likely: the configured query delay was 0 seconds and the observed order lookup completed in 34.17 ms. An inventory configuration issue is also less likely because the recorded region setting was healthy.",
+    "next_check": "Verify that the effective worker configuration is still disabled and check whether the oldest queued order is still pending."
+  },
+  "trace": [
+    {
+      "type": "model",
+      "step": 0,
+      "response_id": "resp_017b75e6bf8795f2016b038b1ac6a487d2aef5220c94cfbbcf",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 506,
+      "output_tokens": 14,
+      "estimated_usd": 0.001152,
+      "elapsed_ms": 1256
+    },
+    {
+      "type": "tool",
+      "name": "read_logs",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-202",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-203",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0 seconds"
+          },
+          {
+            "evidence_id": "obs-204",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is False"
+          },
+          {
+            "evidence_id": "obs-205",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is healthy"
+          },
+          {
+            "evidence_id": "obs-206",
+            "service": "worker",
+            "signal": "worker_offline",
+            "detail": "Worker not running; 1 queued orders"
+          },
+          {
+            "evidence_id": "obs-207",
+            "service": "database",
+            "signal": "query_ok",
+            "detail": "Actual PostgreSQL order lookup: 34.17 ms; 1 rows"
+          }
+        ]
+      },
+      "elapsed_ms": 1263
+    },
+    {
+      "type": "model",
+      "step": 1,
+      "response_id": "resp_017b75e6bf8795f2016b038b1bd57087d2af8be64c2d52d360",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 764,
+      "output_tokens": 16,
+      "estimated_usd": 0.001688,
+      "elapsed_ms": 2347
+    },
+    {
+      "type": "tool",
+      "name": "read_deployments",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-202",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-203",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0 seconds"
+          },
+          {
+            "evidence_id": "obs-204",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is False"
+          },
+          {
+            "evidence_id": "obs-205",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is healthy"
+          }
+        ]
+      },
+      "elapsed_ms": 2354
+    },
+    {
+      "type": "model",
+      "step": 2,
+      "response_id": "resp_017b75e6bf8795f2016b038b1cf5d887d2a1ee4e747a0bf01e",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 946,
+      "output_tokens": 171,
+      "estimated_usd": 0.003602,
+      "elapsed_ms": 5318
+    }
+  ],
+  "usage": {
+    "estimated_usd": 0.006442,
+    "elapsed_ms": 5319,
+    "model": "gpt-6.2-sol"
+  },
+  "verdict": {
+    "passed": true,
+    "checks": {
+      "correct_cause": true,
+      "citations_observed": true,
+      "required_signals_cited": true,
+      "workload_unchanged": true,
+      "no_denied_tools": true
+    },
+    "expected_cause": "worker_stopped",
+    "limitation": "Checks citation existence and required signal coverage; does not prove every natural-language claim. Development scenarios, not a held-out benchmark."
+  },
+  "scope": "Synthetic local PostgreSQL, worker and HTTP dependency; no production systems. Oracle is separate from agent tools, not a security-isolated process."
+}

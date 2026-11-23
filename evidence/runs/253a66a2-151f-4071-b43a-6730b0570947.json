@@ -1,0 +1,124 @@
+{
+  "source_digest": "2f2390c985e42782a05a48268678d4d6039d3033adfb5122bd82978f806202e7",
+  "runtime": {
+    "python": "3.13.18",
+    "openai_sdk": "3.57.0"
+  },
+  "workload_fingerprints": {
+    "before": "78e1f9effbdfec3bdc95d38cd6cb4295b6c6870dc0ea21f6c5d2659270d03165",
+    "after": "78e1f9effbdfec3bdc95d38cd6cb4295b6c6870dc0ea21f6c5d2659270d03165"
+  },
+  "id": "253a66a2-151f-4071-b43a-6730b0570947",
+  "recorded_at": "2026-11-23T00:39:01.219446+00:00",
+  "scenario": "dependency-failure",
+  "experiment": "41aa3619-fb73-403d-83c6-fc9c91ab3afd",
+  "mode": "live-model / real local workload",
+  "diagnosis": {
+    "cause": "dependency_config",
+    "explanation": "Release 1.1 set the inventory region to `wrong-region`. Inventory returned HTTP 503 for that region, leaving the order queued. The matching configuration and failure point to the inventory dependency setting, not just the timing of the deployment.",
+    "evidence_ids": [
+      "obs-208",
+      "obs-211",
+      "obs-213",
+      "obs-210",
+      "obs-212",
+      "obs-209",
+      "obs-214"
+    ],
+    "alternative": "A broader inventory outage could also explain the 503. A stopped worker or database latency is less likely: the worker was enabled and polling, and the database delay was set to zero with a successful 3.81 ms order lookup.",
+    "next_check": "Compare the deployed inventory region with the last known-good configuration, then review recorded inventory health for the intended region during the same time window."
+  },
+  "trace": [
+    {
+      "type": "model",
+      "step": 0,
+      "response_id": "resp_00ff61b9e4a52dd5016b038b21043c87d29e7dbc3712620b38",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 505,
+      "output_tokens": 14,
+      "estimated_usd": 0.00115,
+      "elapsed_ms": 1133
+    },
+    {
+      "type": "tool",
+      "name": "read_logs",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-208",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-209",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0 seconds"
+          },
+          {
+            "evidence_id": "obs-210",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is True"
+          },
+          {
+            "evidence_id": "obs-211",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is wrong-region"
+          },
+          {
+            "evidence_id": "obs-212",
+            "service": "worker",
+            "signal": "worker_heartbeat",
+            "detail": "Background worker polling queued orders"
+          },
+          {
+            "evidence_id": "obs-213",
+            "service": "inventory",
+            "signal": "inventory_failed",
+            "detail": "Inventory returned HTTP 503 for region wrong-region; order remains queued"
+          },
+          {
+            "evidence_id": "obs-214",
+            "service": "database",
+            "signal": "query_ok",
+            "detail": "Actual PostgreSQL order lookup: 3.81 ms; 1 rows"
+          }
+        ]
+      },
+      "elapsed_ms": 1140
+    },
+    {
+      "type": "model",
+      "step": 1,
+      "response_id": "resp_00ff61b9e4a52dd5016b038b2205f087d29c7121177e1da8c3",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 802,
+      "output_tokens": 198,
+      "estimated_usd": 0.003584,
+      "elapsed_ms": 4413
+    }
+  ],
+  "usage": {
+    "estimated_usd": 0.004734,
+    "elapsed_ms": 4414,
+    "model": "gpt-6.2-sol"
+  },
+  "verdict": {
+    "passed": true,
+    "checks": {
+      "correct_cause": true,
+      "citations_observed": true,
+      "required_signals_cited": true,
+      "workload_unchanged": true,
+      "no_denied_tools": true
+    },
+    "expected_cause": "dependency_config",
+    "limitation": "Checks citation existence and required signal coverage; does not prove every natural-language claim. Development scenarios, not a held-out benchmark."
+  },
+  "scope": "Synthetic local PostgreSQL, worker and HTTP dependency; no production systems. Oracle is separate from agent tools, not a security-isolated process."
+}

@@ -1,0 +1,8 @@
+.git
+.venv
+**/node_modules
+**/.next
+.private
+.env*
+artifacts
+test-results

@@ -1,0 +1,233 @@
+{
+  "source_digest": "2f2390c985e42782a05a48268678d4d6039d3033adfb5122bd82978f806202e7",
+  "runtime": {
+    "python": "3.13.18",
+    "openai_sdk": "3.57.0"
+  },
+  "workload_fingerprints": {
+    "before": "443893f8ff04c7c24ae8e945851340fb94300c348e7b77ec9376200c607e9398",
+    "after": "443893f8ff04c7c24ae8e945851340fb94300c348e7b77ec9376200c607e9398"
+  },
+  "id": "b3d2a133-46af-45ea-91e3-84c8857e50f6",
+  "recorded_at": "2026-11-23T00:39:09.655087+00:00",
+  "scenario": "healthy",
+  "experiment": "b9c37f2c-6c5f-4083-b677-cd9d8e5fb84f",
+  "mode": "live-model / real local workload",
+  "diagnosis": {
+    "cause": "healthy",
+    "explanation": "The order workflow was healthy in the latest recorded observations. The worker was polling and completed order 33 after a successful inventory response. The queue showed no pending orders, and the PostgreSQL lookup took 3.47 ms. These observations are consistent with the recorded settings: the worker was enabled, the configured query delay was zero, and the inventory region was set to healthy.",
+    "evidence_ids": [
+      "obs-219",
+      "obs-220",
+      "obs-221",
+      "obs-217",
+      "obs-216",
+      "obs-218"
+    ],
+    "alternative": "An intermittent inventory or database issue could still occur; one completed order does not establish sustained health.",
+    "next_check": "Review the next batch of orders for successful completions, stable queue depth, and any inventory errors or slow database lookups."
+  },
+  "trace": [
+    {
+      "type": "model",
+      "step": 0,
+      "response_id": "resp_0f1a3014e6b67dd9016b038b25edb887d2b2e57ecba4148688",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 505,
+      "output_tokens": 14,
+      "estimated_usd": 0.00115,
+      "elapsed_ms": 1296
+    },
+    {
+      "type": "tool",
+      "name": "read_logs",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-215",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-216",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0 seconds"
+          },
+          {
+            "evidence_id": "obs-217",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is True"
+          },
+          {
+            "evidence_id": "obs-218",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is healthy"
+          },
+          {
+            "evidence_id": "obs-219",
+            "service": "worker",
+            "signal": "worker_heartbeat",
+            "detail": "Background worker polling queued orders"
+          },
+          {
+            "evidence_id": "obs-220",
+            "service": "worker",
+            "signal": "order_completed",
+            "detail": "1 orders completed after successful inventory response"
+          },
+          {
+            "evidence_id": "obs-221",
+            "service": "database",
+            "signal": "query_ok",
+            "detail": "Actual PostgreSQL order lookup: 3.47 ms; 1 rows"
+          }
+        ]
+      },
+      "elapsed_ms": 1306
+    },
+    {
+      "type": "model",
+      "step": 1,
+      "response_id": "resp_0f1a3014e6b67dd9016b038b272ab487d28ec032b21ee909be",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 795,
+      "output_tokens": 16,
+      "estimated_usd": 0.00175,
+      "elapsed_ms": 2401
+    },
+    {
+      "type": "tool",
+      "name": "read_deployments",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-215",
+            "service": "deployment",
+            "signal": "deployment_applied",
+            "detail": "Synthetic release 1.1 applied; review individual settings before assigning cause."
+          },
+          {
+            "evidence_id": "obs-216",
+            "service": "database",
+            "signal": "query_config_changed",
+            "detail": "Query delay setting changed to 0 seconds"
+          },
+          {
+            "evidence_id": "obs-217",
+            "service": "worker",
+            "signal": "worker_config_changed",
+            "detail": "Worker enabled setting is True"
+          },
+          {
+            "evidence_id": "obs-218",
+            "service": "inventory",
+            "signal": "inventory_config_changed",
+            "detail": "Inventory region setting is healthy"
+          }
+        ]
+      },
+      "elapsed_ms": 2405
+    },
+    {
+      "type": "model",
+      "step": 2,
+      "response_id": "resp_0f1a3014e6b67dd9016b038b28487c87d284eb31aff3e9e1b8",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 977,
+      "output_tokens": 14,
+      "estimated_usd": 0.002094,
+      "elapsed_ms": 3419
+    },
+    {
+      "type": "tool",
+      "name": "read_queue",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "orders": [
+          {
+            "id": 33,
+            "status": "completed"
+          }
+        ],
+        "queued": 0
+      },
+      "elapsed_ms": 3423
+    },
+    {
+      "type": "model",
+      "step": 3,
+      "response_id": "resp_0f1a3014e6b67dd9016b038b294aac87d29681b24b1ea6a1b0",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 1024,
+      "output_tokens": 14,
+      "estimated_usd": 0.002188,
+      "elapsed_ms": 4681
+    },
+    {
+      "type": "tool",
+      "name": "read_health",
+      "arguments": "{}",
+      "ok": true,
+      "result": {
+        "records": [
+          {
+            "evidence_id": "obs-219",
+            "service": "worker",
+            "signal": "worker_heartbeat",
+            "detail": "Background worker polling queued orders"
+          },
+          {
+            "evidence_id": "obs-220",
+            "service": "worker",
+            "signal": "order_completed",
+            "detail": "1 orders completed after successful inventory response"
+          },
+          {
+            "evidence_id": "obs-221",
+            "service": "database",
+            "signal": "query_ok",
+            "detail": "Actual PostgreSQL order lookup: 3.47 ms; 1 rows"
+          }
+        ]
+      },
+      "elapsed_ms": 4684
+    },
+    {
+      "type": "model",
+      "step": 4,
+      "response_id": "resp_0f1a3014e6b67dd9016b038b2a85e487d2939ef515584a0620",
+      "model": "gpt-6.2-sol",
+      "input_tokens": 1165,
+      "output_tokens": 189,
+      "estimated_usd": 0.00422,
+      "elapsed_ms": 7901
+    }
+  ],
+  "usage": {
+    "estimated_usd": 0.011402,
+    "elapsed_ms": 7902,
+    "model": "gpt-6.2-sol"
+  },
+  "verdict": {
+    "passed": true,
+    "checks": {
+      "correct_cause": true,
+      "citations_observed": true,
+      "required_signals_cited": true,
+      "workload_unchanged": true,
+      "no_denied_tools": true
+    },
+    "expected_cause": "healthy",
+    "limitation": "Checks citation existence and required signal coverage; does not prove every natural-language claim. Development scenarios, not a held-out benchmark."
+  },
+  "scope": "Synthetic local PostgreSQL, worker and HTTP dependency; no production systems. Oracle is separate from agent tools, not a security-isolated process."
+}
