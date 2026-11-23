@@ -77,3 +77,22 @@ Both runs used four synthetic recovery incidents, two repetitions per configurat
 The fixed-cap arm reserved one of its six calls for review. Luna exhausted its five investigation calls in four trials and returned no diagnosis. The matched-budget arm allowed one additional review call. In that arm the reviewer repaired one of Luna's initial citation failures and rejected one initially supported diagnosis. The separate baseline generated different initial diagnoses, so the 4/8 to 7/8 difference includes variation between model runs. The two benchmark runs partly overlapped, and the latency figures describe those conditions. Combined estimated usage was $0.439946.
 
 [Fixed-cap report](../evidence/assurance/citation-review-fixed-cap/summary.json) · [Fixed-cap traces](../evidence/assurance/citation-review-fixed-cap/runs.jsonl) · [Matched-budget report](../evidence/assurance/citation-review-matched-budget/summary.json) · [Matched-budget traces](../evidence/assurance/citation-review-matched-budget/runs.jsonl)
+
+### Blind and paired follow-up
+
+The first blind follow-up used 20 new synthetic incidents with a separately sealed answer key. Neither model received the key. Both models scored 20/20 for cause accuracy, and second-pass review reduced supported diagnoses from 20/20 to 17/20 for each model. All six regressions involved worker stoppage. Estimated usage was $0.439029. [Blind summary](../evidence/assurance/citation-review-blind/summary.json) · [Blind traces](../evidence/assurance/citation-review-blind/runs.jsonl)
+
+The paired benchmark runs the investigation once and scores its initial and reviewed citations against the same rubric. The revised reviewer recognizes current absence of consumers, job starts, or heartbeats when effective worker settings corroborate it. The reviewer sees observed records and the fixed cause, and the grading key stays outside the model payload.
+
+```sh
+python -m backend.reliability.recovery_benchmark --paired-citation-review --repeats 1 --cases observations.json --key answers.json --sealed sealed.json --output .private/paired-review
+python -m backend.reliability.verify_paired_citations evidence/assurance/citation-review-paired
+```
+
+Selective review is an offline replay of the captured initial diagnoses and reviewer outputs. It applies the review only when the initial run shows missing or invalid citations, a tool error, or a stale or conflicting record. The summary estimates policy latency and cost from the recorded phases. Its estimates describe these runs, which used up to four concurrent incidents. The citation check remains opt-in.
+
+The paired run covered 12 fresh lab-authored synthetic incidents, including six worker-stoppage cases. Both models scored 12/12 before and after review, including 6/6 worker cases per model. The new run shows no recurrence of the original regression on these fixtures. Every initial diagnosis already passed, so this cohort cannot measure the review's ability to repair a weak citation. Selective replay kept the same scores while using two of Sol's 12 review calls and seven of Luna's 12. The live run used an estimated $0.142241 from existing API credits.
+
+[Paired policy summary](../evidence/assurance/citation-review-paired/summary.json) · [Paired trial traces](../evidence/assurance/citation-review-paired/runs.jsonl)
+
+For independent validation, have a reviewer outside the lab author observations and adjudicate both claim roles using the intake format above. Include ambiguous cases and citations with real support defects, and seal the suite before either model runs. Independent authoring and adjudication remain open.

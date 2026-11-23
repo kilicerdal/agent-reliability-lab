@@ -1,0 +1,62 @@
+{
+  "gpt-6.2-sol/off": {
+    "runs": 12,
+    "supported": 12,
+    "correct_cause": 12,
+    "review_calls": 0,
+    "median_ms": 5899.5,
+    "p95_ms": 7542,
+    "estimated_usd": 0.112238,
+    "estimated_usd_per_supported": 0.009353
+  },
+  "gpt-6.2-sol/always": {
+    "runs": 12,
+    "supported": 12,
+    "correct_cause": 12,
+    "review_calls": 12,
+    "median_ms": 7818.0,
+    "p95_ms": 9591,
+    "estimated_usd": 0.134186,
+    "estimated_usd_per_supported": 0.011182
+  },
+  "gpt-6.2-sol/selective": {
+    "runs": 12,
+    "supported": 12,
+    "correct_cause": 12,
+    "review_calls": 2,
+    "median_ms": 5899.5,
+    "p95_ms": 9591,
+    "estimated_usd": 0.116096,
+    "estimated_usd_per_supported": 0.009675
+  },
+  "gpt-6-luna/off": {
+    "runs": 12,
+    "supported": 12,
+    "correct_cause": 12,
+    "review_calls": 0,
+    "median_ms": 5548.0,
+    "p95_ms": 8059,
+    "estimated_usd": 0.006821,
+    "estimated_usd_per_supported": 0.000568
+  },
+  "gpt-6-luna/always": {
+    "runs": 12,
+    "supported": 12,
+    "correct_cause": 12,
+    "review_calls": 12,
+    "median_ms": 7094.0,
+    "p95_ms": 10361,
+    "estimated_usd": 0.008055,
+    "estimated_usd_per_supported": 0.000671
+  },
+  "gpt-6-luna/selective": {
+    "runs": 12,
+    "supported": 12,
+    "correct_cause": 12,
+    "review_calls": 7,
+    "median_ms": 6447.0,
+    "p95_ms": 10361,
+    "estimated_usd": 0.007499,
+    "estimated_usd_per_supported": 0.000625
+  }
+}

@@ -1,0 +1,470 @@
+[
+  {
+    "id": "dispatch-worker",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "dispatch-worker-7",
+        "verdict": "supports",
+        "required_excerpt": "The sampled dispatch queue has no active consumers and no job starts"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "dispatch-worker-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "dispatch-worker-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "dispatch-worker-3",
+        "verdict": "supports",
+        "required_excerpt": "The active dispatch deployment has zero worker replicas"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "dispatch-worker-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "dispatch-worker-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "digest-worker",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "digest-worker-7",
+        "verdict": "supports",
+        "required_excerpt": "Digest consumer heartbeats stop at the start of the affected interval"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "digest-worker-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "digest-worker-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "digest-worker-3",
+        "verdict": "supports",
+        "required_excerpt": "The effective service state shows the digest worker is disabled"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "digest-worker-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "digest-worker-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "sequence-worker",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "sequence-worker-7",
+        "verdict": "supports",
+        "required_excerpt": "Allocation jobs never start and the current broker consumer group is empty"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "sequence-worker-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "sequence-worker-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "sequence-worker-3",
+        "verdict": "supports",
+        "required_excerpt": "The scheduler currently keeps all allocation workers paused"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "sequence-worker-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "sequence-worker-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "sync-worker",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "sync-worker-7",
+        "verdict": "supports",
+        "required_excerpt": "All sync consumer leases expired and there are no starts for current jobs"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "sync-worker-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "sync-worker-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "sync-worker-3",
+        "verdict": "supports",
+        "required_excerpt": "The running reconciliation deployment scales its worker pool to zero"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "sync-worker-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "sync-worker-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "packing-worker",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "packing-worker-7",
+        "verdict": "supports",
+        "required_excerpt": "The packing queue has zero connected workers across three current snapshots"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "packing-worker-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "packing-worker-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "packing-worker-3",
+        "verdict": "supports",
+        "required_excerpt": "The active packing worker unit is masked after the host restart"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "packing-worker-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "packing-worker-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "notice-worker",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "notice-worker-7",
+        "verdict": "supports",
+        "required_excerpt": "Current notice traces show no job starts and no consumer heartbeat"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "notice-worker-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "notice-worker-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "notice-worker-3",
+        "verdict": "supports",
+        "required_excerpt": "The active notice scheduler explicitly suspends the notice worker"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "notice-worker-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "notice-worker-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "renewal-lock",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "renewal-lock-7",
+        "verdict": "supports",
+        "required_excerpt": "Renewal SQL waits 1.1 seconds for a row lock after a fast upstream reply"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "renewal-lock-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "renewal-lock-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "renewal-lock-3",
+        "verdict": "supports",
+        "required_excerpt": "The effective renewal reconciliation job holds that row lock during the observed interval"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "renewal-lock-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "renewal-lock-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "session-spill",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "session-spill-7",
+        "verdict": "supports",
+        "required_excerpt": "Current report traces show 1.3 seconds spent on SQL sort spill I/O"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "session-spill-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "session-spill-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "session-spill-3",
+        "verdict": "supports",
+        "required_excerpt": "Effective report sessions use a work memory setting below the current sort requirement"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "session-spill-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "session-spill-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "voucher-endpoint",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "voucher-endpoint-7",
+        "verdict": "supports",
+        "required_excerpt": "The upstream returns 404 on every validation request to the old route"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "voucher-endpoint-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "voucher-endpoint-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "voucher-endpoint-3",
+        "verdict": "supports",
+        "required_excerpt": "The running voucher client still targets the retired validation endpoint"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "voucher-endpoint-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "voucher-endpoint-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "calendar-host",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "calendar-host-7",
+        "verdict": "supports",
+        "required_excerpt": "The provider returns a host mismatch on the configured calendar route"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "calendar-host-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "calendar-host-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "calendar-host-3",
+        "verdict": "supports",
+        "required_excerpt": "The running client sends the retired calendar host in its upstream request"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "calendar-host-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "calendar-host-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "normal-reservation",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "normal-reservation-7",
+        "verdict": "supports",
+        "required_excerpt": "Current reservations finish within the normal target and no pending backlog remains"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "normal-reservation-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "normal-reservation-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "normal-reservation-3",
+        "verdict": "supports",
+        "required_excerpt": "The effective reservation configuration matches the verified healthy baseline"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "normal-reservation-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "normal-reservation-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "ingest-disagreement",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "ingest-disagreement-7",
+        "verdict": "supports",
+        "required_excerpt": "Two current collectors disagree about whether ingestion workers started during the gap"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "ingest-disagreement-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "ingest-disagreement-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "ingest-disagreement-3",
+        "verdict": "supports",
+        "required_excerpt": "No effective worker or route settings survived for the affected interval"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "ingest-disagreement-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "ingest-disagreement-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  }
+]

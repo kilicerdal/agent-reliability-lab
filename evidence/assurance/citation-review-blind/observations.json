@@ -1,0 +1,482 @@
+[
+  {
+    "id": "invoice-totals",
+    "alert": "Invoice totals are late after the overnight window.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "invoice-totals-7",
+          "detail": "Invoice total reads wait 1.4 s for the billing_rollup lock."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "invoice-totals-3",
+          "detail": "The active refresh holds an exclusive lock on billing_rollup."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "invoice-totals-5",
+          "detail": "The tax service returns 200 in 24 ms."
+        }
+      ]
+    }
+  },
+  {
+    "id": "tenant-export",
+    "alert": "One tenant's exports slowed after a capacity change.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "tenant-export-7",
+          "detail": "Export traces attribute 94% of elapsed time to SQL bitmap heap reads."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "tenant-export-3",
+          "detail": "The active tenant export plan scans a large partition without its supporting index."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "tenant-export-5",
+          "detail": "Export workers continue to heartbeat every two seconds."
+        }
+      ]
+    }
+  },
+  {
+    "id": "cart-audit",
+    "alert": "Cart audit requests time out while ordinary cart reads succeed.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "cart-audit-7",
+          "detail": "Audit SQL waits 840 ms for the connection pool before executing."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "cart-audit-3",
+          "detail": "The effective SQL pool limit for audit traffic fell from 30 connections to 2."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "cart-audit-5",
+          "detail": "The audit queue is empty at the time of sampling."
+        }
+      ]
+    }
+  },
+  {
+    "id": "refund-search",
+    "alert": "A refund search regression coincides with a worker release.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "refund-search-7",
+          "detail": "Refund lookup spends 1.2 seconds in PostgreSQL sort spills."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "refund-search-3",
+          "detail": "The deployed refund search session sets work_mem below the sort requirement."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "refund-search-5",
+          "detail": "A last-week note blamed stopped workers for an unrelated delay."
+        }
+      ]
+    }
+  },
+  {
+    "id": "email-receipts",
+    "alert": "Receipt jobs accumulate after a rollout.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "email-receipts-7",
+          "detail": "Receipt jobs remain untouched and receipt consumer heartbeats stop at the rollout."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "email-receipts-3",
+          "detail": "The effective receipt consumer deployment has zero desired replicas."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "email-receipts-5",
+          "detail": "SMTP health checks pass in 19 ms."
+        }
+      ]
+    }
+  },
+  {
+    "id": "pdf-archive",
+    "alert": "PDF archives are queued after a maintenance window.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "pdf-archive-7",
+          "detail": "The archive queue has no active consumers despite successful queue writes."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "pdf-archive-3",
+          "detail": "The current archive worker unit is disabled and stopped."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "pdf-archive-5",
+          "detail": "A historical note blames slow SQL queries."
+        }
+      ]
+    }
+  },
+  {
+    "id": "settlement-cutoff",
+    "alert": "Settlement jobs remain queued after the cutoff.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "settlement-cutoff-7",
+          "detail": "The settlement consumer stopped heartbeating while enqueue traffic remained normal."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "settlement-cutoff-3",
+          "detail": "Maintenance left the settlement worker paused with no resume time."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "settlement-cutoff-5",
+          "detail": "The database reports healthy transaction latency."
+        }
+      ]
+    }
+  },
+  {
+    "id": "thumbnail-backfill",
+    "alert": "Thumbnail backfill events are accepted but never start.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "thumbnail-backfill-7",
+          "detail": "Backfill work has no active consumer sessions across three samples."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "thumbnail-backfill-3",
+          "detail": "Deployment policy disables every backfill worker instance."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "thumbnail-backfill-5",
+          "detail": "Image storage reports successful 200 responses."
+        }
+      ]
+    }
+  },
+  {
+    "id": "rate-provider",
+    "alert": "Currency quote requests fail after endpoint rotation.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "rate-provider-7",
+          "detail": "The currency quote client receives 404 from upstream /legacy-rate."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "rate-provider-3",
+          "detail": "Runtime routing still points the rate client to the retired /legacy-rate path."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "rate-provider-5",
+          "detail": "The currency quote queue is flowing."
+        }
+      ]
+    }
+  },
+  {
+    "id": "shipping-zone",
+    "alert": "Zone checks fail for all new shipping labels.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "shipping-zone-7",
+          "detail": "The shipping upstream rejects requests with an audience-mismatch error."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "shipping-zone-3",
+          "detail": "The selected shipping integration config sends the sandbox token audience to production."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "shipping-zone-5",
+          "detail": "The label database reads complete in 20 ms."
+        }
+      ]
+    }
+  },
+  {
+    "id": "postal-router",
+    "alert": "Address checks began failing after a route consolidation.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "postal-router-7",
+          "detail": "The address validator receives 421 because the upstream host header selects the wrong service."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "postal-router-3",
+          "detail": "The runtime address validation route sets the host header to the retired validator."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "postal-router-5",
+          "detail": "A cached incident from March cites a worker stop."
+        }
+      ]
+    }
+  },
+  {
+    "id": "entitlement-proxy",
+    "alert": "New entitlement verifications fail intermittently.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "entitlement-proxy-7",
+          "detail": "Failing requests go to the deprecated entitlement host while the current host returns success."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "entitlement-proxy-3",
+          "detail": "The active proxy still assigns half the entitlement traffic to the deprecated host."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "entitlement-proxy-5",
+          "detail": "Database and worker probes remain healthy."
+        }
+      ]
+    }
+  },
+  {
+    "id": "search-canary",
+    "alert": "An old alert says product search is degraded.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "search-canary-7",
+          "detail": "Current canary and production search requests meet latency and success targets."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "search-canary-3",
+          "detail": "The active search configuration matches the last verified healthy rollout."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "search-canary-5",
+          "detail": "Yesterday's alert refers to a retired search deployment."
+        }
+      ]
+    }
+  },
+  {
+    "id": "credit-memo",
+    "alert": "An operator asks whether credit memo processing is delayed.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "credit-memo-7",
+          "detail": "Current credit memo processing clears every observed job within the target."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "credit-memo-3",
+          "detail": "The running worker and routing settings match the approved normal baseline."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "credit-memo-5",
+          "detail": "The historical backlog peaked at 500 before clearing."
+        }
+      ]
+    }
+  },
+  {
+    "id": "batch-ledger",
+    "alert": "Check whether yesterday's ledger export incident has returned.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "batch-ledger-7",
+          "detail": "Current ledger export probes finish within target with no queue growth or error spikes."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "batch-ledger-3",
+          "detail": "The current export settings match the verified healthy configuration."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "batch-ledger-5",
+          "detail": "A cached note still reports yesterday's lock incident."
+        }
+      ]
+    }
+  },
+  {
+    "id": "tax-cache",
+    "alert": "A synthetic alert reports possible tax lookup degradation.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "tax-cache-7",
+          "detail": "Current tax lookups meet the availability and latency targets across both regions."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "tax-cache-3",
+          "detail": "The active tax cache endpoints and worker settings match the known healthy baseline."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "tax-cache-5",
+          "detail": "One expired dashboard card displays a red status."
+        }
+      ]
+    }
+  },
+  {
+    "id": "partial-trace",
+    "alert": "Checkout latency spiked and telemetry is incomplete.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "partial-trace-7",
+          "detail": "Only overall request duration survived; SQL and external dependency spans are missing for the affected interval."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "partial-trace-3",
+          "detail": "The deployment audit is missing effective settings for the affected interval."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "partial-trace-5",
+          "detail": "A routine queue snapshot from yesterday shows five jobs."
+        }
+      ]
+    }
+  },
+  {
+    "id": "clock-drift",
+    "alert": "Two monitors disagree about the first failure.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "clock-drift-7",
+          "detail": "The database and dependency timelines overlap after accounting for clock drift, so their order cannot be established."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "clock-drift-3",
+          "detail": "The rollout record lacks effective timestamps for both changes."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "clock-drift-5",
+          "detail": "An old ticket describes a different database outage."
+        }
+      ]
+    }
+  },
+  {
+    "id": "conflicting-counts",
+    "alert": "A queue dashboard shows possible worker inactivity.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "conflicting-counts-7",
+          "detail": "Two current collectors disagree on whether receipt worker heartbeats exist for identical instance IDs."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "conflicting-counts-3",
+          "detail": "No effective runtime worker state survived the collector outage."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "conflicting-counts-5",
+          "detail": "The dashboard title names the worker service."
+        }
+      ]
+    }
+  },
+  {
+    "id": "cutover-gap",
+    "alert": "A brief disruption occurred during a traffic cutover.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "cutover-gap-7",
+          "detail": "Only aggregated failures survived and the samples cannot distinguish the SQL path from the upstream path."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "cutover-gap-3",
+          "detail": "The effective traffic-split configuration for the incident window was not retained."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "cutover-gap-5",
+          "detail": "A later health check shows normal operation."
+        }
+      ]
+    }
+  }
+]

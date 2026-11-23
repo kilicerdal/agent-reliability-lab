@@ -87,6 +87,12 @@ def test_benchmark_review_preserves_cause_and_fails_closed(monkeypatch, valid_re
     assert row["verdict"]["passed"] is valid_review
     assert row["citation_review"] == ("accepted" if valid_review else "rejected")
     assert row["original_diagnosis"]["claims"][0]["evidence_id"] == "obs-2"
+    assert not row["original_verdict"]["passed"]
+    assert row["review_proposal"] is not None
+    policies = recovery_benchmark.summarize_review_policies([row])
+    assert policies["gpt-6-luna/off"]["supported"] == 0
+    assert policies["gpt-6-luna/selective"]["supported"] == 0
+    assert policies["gpt-6-luna/always"]["supported"] == int(valid_review)
 
 
 def test_citation_support_rejects_observed_but_inadequate_evidence():

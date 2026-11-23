@@ -1,0 +1,782 @@
+[
+  {
+    "id": "invoice-totals",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "invoice-totals-7",
+        "verdict": "supports",
+        "required_excerpt": "Invoice total reads wait 1.4 s for the billing_rollup lock"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "invoice-totals-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "invoice-totals-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "invoice-totals-3",
+        "verdict": "supports",
+        "required_excerpt": "The active refresh holds an exclusive lock on billing_rollup"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "invoice-totals-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "invoice-totals-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "tenant-export",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "tenant-export-7",
+        "verdict": "supports",
+        "required_excerpt": "Export traces attribute 94% of elapsed time to SQL bitmap heap reads"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "tenant-export-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "tenant-export-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "tenant-export-3",
+        "verdict": "supports",
+        "required_excerpt": "The active tenant export plan scans a large partition without its supporting index"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "tenant-export-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "tenant-export-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "cart-audit",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "cart-audit-7",
+        "verdict": "supports",
+        "required_excerpt": "Audit SQL waits 840 ms for the connection pool before executing"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "cart-audit-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "cart-audit-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "cart-audit-3",
+        "verdict": "supports",
+        "required_excerpt": "The effective SQL pool limit for audit traffic fell from 30 connections to 2"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "cart-audit-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "cart-audit-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "refund-search",
+    "cause": "db_latency",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "refund-search-7",
+        "verdict": "supports",
+        "required_excerpt": "Refund lookup spends 1.2 seconds in PostgreSQL sort spills"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "refund-search-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "refund-search-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "refund-search-3",
+        "verdict": "supports",
+        "required_excerpt": "The deployed refund search session sets work_mem below the sort requirement"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "refund-search-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "refund-search-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "email-receipts",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "email-receipts-7",
+        "verdict": "supports",
+        "required_excerpt": "Receipt jobs remain untouched and receipt consumer heartbeats stop at the rollout"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "email-receipts-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "email-receipts-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "email-receipts-3",
+        "verdict": "supports",
+        "required_excerpt": "The effective receipt consumer deployment has zero desired replicas"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "email-receipts-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "email-receipts-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "pdf-archive",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "pdf-archive-7",
+        "verdict": "supports",
+        "required_excerpt": "The archive queue has no active consumers despite successful queue writes"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "pdf-archive-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "pdf-archive-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "pdf-archive-3",
+        "verdict": "supports",
+        "required_excerpt": "The current archive worker unit is disabled and stopped"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "pdf-archive-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "pdf-archive-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "settlement-cutoff",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "settlement-cutoff-7",
+        "verdict": "supports",
+        "required_excerpt": "The settlement consumer stopped heartbeating while enqueue traffic remained normal"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "settlement-cutoff-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "settlement-cutoff-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "settlement-cutoff-3",
+        "verdict": "supports",
+        "required_excerpt": "Maintenance left the settlement worker paused with no resume time"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "settlement-cutoff-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "settlement-cutoff-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "thumbnail-backfill",
+    "cause": "worker_stopped",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "thumbnail-backfill-7",
+        "verdict": "supports",
+        "required_excerpt": "Backfill work has no active consumer sessions across three samples"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "thumbnail-backfill-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "thumbnail-backfill-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "thumbnail-backfill-3",
+        "verdict": "supports",
+        "required_excerpt": "Deployment policy disables every backfill worker instance"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "thumbnail-backfill-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "thumbnail-backfill-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "rate-provider",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "rate-provider-7",
+        "verdict": "supports",
+        "required_excerpt": "The currency quote client receives 404 from upstream /legacy-rate"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "rate-provider-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "rate-provider-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "rate-provider-3",
+        "verdict": "supports",
+        "required_excerpt": "Runtime routing still points the rate client to the retired /legacy-rate path"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "rate-provider-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "rate-provider-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "shipping-zone",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "shipping-zone-7",
+        "verdict": "supports",
+        "required_excerpt": "The shipping upstream rejects requests with an audience-mismatch error"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "shipping-zone-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "shipping-zone-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "shipping-zone-3",
+        "verdict": "supports",
+        "required_excerpt": "The selected shipping integration config sends the sandbox token audience to production"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "shipping-zone-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "shipping-zone-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "postal-router",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "postal-router-7",
+        "verdict": "supports",
+        "required_excerpt": "The address validator receives 421 because the upstream host header selects the wrong service"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "postal-router-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "postal-router-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "postal-router-3",
+        "verdict": "supports",
+        "required_excerpt": "The runtime address validation route sets the host header to the retired validator"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "postal-router-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "postal-router-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "entitlement-proxy",
+    "cause": "dependency_config",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "entitlement-proxy-7",
+        "verdict": "supports",
+        "required_excerpt": "Failing requests go to the deprecated entitlement host while the current host returns success"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "entitlement-proxy-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "entitlement-proxy-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "entitlement-proxy-3",
+        "verdict": "supports",
+        "required_excerpt": "The active proxy still assigns half the entitlement traffic to the deprecated host"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "entitlement-proxy-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "entitlement-proxy-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "search-canary",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "search-canary-7",
+        "verdict": "supports",
+        "required_excerpt": "Current canary and production search requests meet latency and success targets"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "search-canary-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "search-canary-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "search-canary-3",
+        "verdict": "supports",
+        "required_excerpt": "The active search configuration matches the last verified healthy rollout"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "search-canary-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "search-canary-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "credit-memo",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "credit-memo-7",
+        "verdict": "supports",
+        "required_excerpt": "Current credit memo processing clears every observed job within the target"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "credit-memo-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "credit-memo-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "credit-memo-3",
+        "verdict": "supports",
+        "required_excerpt": "The running worker and routing settings match the approved normal baseline"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "credit-memo-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "credit-memo-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "batch-ledger",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "batch-ledger-7",
+        "verdict": "supports",
+        "required_excerpt": "Current ledger export probes finish within target with no queue growth or error spikes"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "batch-ledger-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "batch-ledger-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "batch-ledger-3",
+        "verdict": "supports",
+        "required_excerpt": "The current export settings match the verified healthy configuration"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "batch-ledger-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "batch-ledger-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "tax-cache",
+    "cause": "healthy",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "tax-cache-7",
+        "verdict": "supports",
+        "required_excerpt": "Current tax lookups meet the availability and latency targets across both regions"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "tax-cache-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "tax-cache-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "tax-cache-3",
+        "verdict": "supports",
+        "required_excerpt": "The active tax cache endpoints and worker settings match the known healthy baseline"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "tax-cache-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "tax-cache-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "partial-trace",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "partial-trace-7",
+        "verdict": "supports",
+        "required_excerpt": "Only overall request duration survived; SQL and external dependency spans are missing for the affected interval"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "partial-trace-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "partial-trace-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "partial-trace-3",
+        "verdict": "supports",
+        "required_excerpt": "The deployment audit is missing effective settings for the affected interval"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "partial-trace-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "partial-trace-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "clock-drift",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "clock-drift-7",
+        "verdict": "supports",
+        "required_excerpt": "The database and dependency timelines overlap after accounting for clock drift, so their order cannot be established"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "clock-drift-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "clock-drift-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "clock-drift-3",
+        "verdict": "supports",
+        "required_excerpt": "The rollout record lacks effective timestamps for both changes"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "clock-drift-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "clock-drift-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "conflicting-counts",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "conflicting-counts-7",
+        "verdict": "supports",
+        "required_excerpt": "Two current collectors disagree on whether receipt worker heartbeats exist for identical instance IDs"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "conflicting-counts-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "conflicting-counts-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "conflicting-counts-3",
+        "verdict": "supports",
+        "required_excerpt": "No effective runtime worker state survived the collector outage"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "conflicting-counts-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "conflicting-counts-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  },
+  {
+    "id": "cutover-gap",
+    "cause": "unknown",
+    "reviewer": "lab-author",
+    "judgments": [
+      {
+        "kind": "mechanism",
+        "evidence_id": "cutover-gap-7",
+        "verdict": "supports",
+        "required_excerpt": "Only aggregated failures survived and the samples cannot distinguish the SQL path from the upstream path"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "cutover-gap-7",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "cutover-gap-3",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "cutover-gap-3",
+        "verdict": "supports",
+        "required_excerpt": "The effective traffic-split configuration for the incident window was not retained"
+      },
+      {
+        "kind": "mechanism",
+        "evidence_id": "cutover-gap-5",
+        "verdict": "irrelevant"
+      },
+      {
+        "kind": "configuration",
+        "evidence_id": "cutover-gap-5",
+        "verdict": "irrelevant"
+      }
+    ]
+  }
+]

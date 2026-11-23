@@ -46,7 +46,13 @@ REVIEW_CITATIONS = (
     "one configuration claim with exact quotes that directly establish the cause. "
     "Replace weak citations with stronger observed evidence. A timeout, symptom, "
     "or historical summary alone does not establish a cause. For unknown, cite "
-    "specific observed gaps or conflicts. Return an empty claims list if either "
+    "specific observed gaps or conflicts. For worker_stopped, a current absence "
+    "of heartbeats, active consumers, or job starts can support the mechanism "
+    "when corroborated by effective runtime settings such as zero replicas, "
+    "a disabled unit, or a paused worker. Cite workload for the mechanism and "
+    "the setting for configuration. A symptom such as backlog alone is insufficient. "
+    "Keep supported original citations and quote the complete supporting sentence. "
+    "Return an empty claims list if either "
     "claim cannot be supported. Never change the cause."
 )
 
@@ -57,6 +63,9 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
     error = None
     review_status = None
     original = None
+    initial_elapsed_ms = None
+    review_proposal = None
+    review_triggers = []
     verified = prompt == "verify-citations"
     start = time.monotonic()
     budget = Budget(rates=RATES[model])
@@ -78,11 +87,40 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
         )
         if verified:
             original = diagnosis.model_dump()
+            initial_elapsed_ms = round((time.monotonic() - start) * 1000)
             review_status = "unavailable"
             observed, inconsistent = observed_records(trace)
             records = {
                 key: text for key, text in observed.items() if key not in inconsistent
             }
+            if {claim.kind for claim in diagnosis.claims} != {
+                "mechanism",
+                "configuration",
+            } or any(
+                claim.evidence_id not in diagnosis.evidence_ids
+                or claim.quote not in records.get(claim.evidence_id, "")
+                for claim in diagnosis.claims
+            ):
+                review_triggers.append("incomplete_or_invalid_citation")
+            if inconsistent or any(
+                any(
+                    marker in detail.lower()
+                    for marker in (
+                        "historical",
+                        "stale",
+                        "disagree",
+                        "conflict",
+                        "cached",
+                    )
+                )
+                for detail in records.values()
+            ):
+                review_triggers.append("potentially_stale_or_conflicting_evidence")
+            if any(
+                event["type"] == "tool" and event["result"].get("error")
+                for event in trace
+            ):
+                review_triggers.append("tool_error")
             review_trace = []
             try:
                 review, _, _ = investigate(
@@ -111,6 +149,7 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
                     {**event, "phase": "citation_review"} for event in review_trace
                 )
             revised = apply_citation_review(diagnosis, review, records)
+            review_proposal = review.model_dump()
             review_status = "accepted" if revised else "rejected"
             if revised:
                 diagnosis = revised
@@ -133,7 +172,21 @@ def run_once(client, model, prompt, alert, tools, answer, rubric):
         "model": model,
         "prompt": prompt,
         **(
-            {"citation_review": review_status, "original_diagnosis": original}
+            {
+                "citation_review": review_status,
+                "original_diagnosis": original,
+                "original_verdict": grade_claims(
+                    SupportedDiagnosis.model_validate(original) if original else None,
+                    answer,
+                    trace,
+                    rubric,
+                ),
+                "initial_elapsed_ms": initial_elapsed_ms
+                if original
+                else round(elapsed * 1000),
+                "review_triggers": review_triggers,
+                "review_proposal": review_proposal,
+            }
             if verified
             else {}
         ),
@@ -168,7 +221,49 @@ def summarize(rows):
     }
 
 
-def run_suite(client, output, cases, repeats, *, live, citation_review=False):
+def summarize_review_policies(rows):
+    """Estimate selective review on the same captured diagnoses and review calls."""
+    groups = defaultdict(list)
+    for row in rows:
+        for policy, reviewed in (
+            ("off", False),
+            ("always", True),
+            ("selective", bool(row["review_triggers"])),
+        ):
+            verdict = row["verdict"] if reviewed else row["original_verdict"]
+            elapsed = row["elapsed_ms"] if reviewed else row["initial_elapsed_ms"]
+            cost = sum(
+                event.get("estimated_usd", 0)
+                for event in row["trace"]
+                if reviewed or event.get("phase") != "citation_review"
+            )
+            called = reviewed and any(
+                event.get("phase") == "citation_review" for event in row["trace"]
+            )
+            groups[f"{row['model']}/{policy}"].append((verdict, elapsed, cost, called))
+    report = {}
+    for arm, group in groups.items():
+        times = sorted(row[1] for row in group)
+        total = sum(row[2] for row in group)
+        supported = sum(row[0]["passed"] for row in group)
+        report[arm] = {
+            "runs": len(group),
+            "supported": supported,
+            "correct_cause": sum(row[0]["cause_correct"] for row in group),
+            "review_calls": sum(row[3] for row in group),
+            "median_ms": median(times),
+            "p95_ms": times[(95 * len(times) + 99) // 100 - 1],
+            "estimated_usd": round(total, 6),
+            "estimated_usd_per_supported": round(total / supported, 6)
+            if supported
+            else None,
+        }
+    return report
+
+
+def run_suite(
+    client, output, cases, repeats, *, live, citation_review=False, paired=False
+):
     rows = []
     prompts = (
         ("check-support", "verify-citations")
@@ -176,6 +271,8 @@ def run_suite(client, output, cases, repeats, *, live, citation_review=False):
         else ("basic-citations", "check-support")
     )
     arms = [(model, prompt) for model in RATES for prompt in prompts]
+    if paired:
+        arms = [(model, "verify-citations") for model in RATES]
     with (output / "runs.jsonl").open("x") as log:
         for repeat in range(1, repeats + 1):
             for index, case in enumerate(cases):
@@ -232,7 +329,9 @@ def main():
     parser.add_argument("--key", type=Path)
     parser.add_argument("--sealed", type=Path)
     parser.add_argument("--repeats", type=int, choices=(1, 2, 3), default=2)
-    parser.add_argument("--citation-review", action="store_true")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--citation-review", action="store_true")
+    modes.add_argument("--paired-citation-review", action="store_true")
     args = parser.parse_args()
     intake = (args.cases, args.key, args.sealed)
     if any(intake) and not all(intake):
@@ -258,6 +357,7 @@ def main():
                 "suite": manifest,
                 "repeats": args.repeats,
                 "citation_review": args.citation_review,
+                "paired_citation_review": args.paired_citation_review,
                 "rates_per_million": RATES,
                 "limits": {
                     "elapsed_seconds": LATENCY_LIMIT,
@@ -274,9 +374,16 @@ def main():
         args.repeats,
         live=not external,
         citation_review=args.citation_review,
+        paired=args.paired_citation_review,
     )
     (args.output / "summary.json").write_text(
-        json.dumps(summarize(rows), indent=2) + "\n"
+        json.dumps(
+            summarize_review_policies(rows)
+            if args.paired_citation_review
+            else summarize(rows),
+            indent=2,
+        )
+        + "\n"
     )
 
 
