@@ -233,6 +233,11 @@ const causeNames: Record<string, string> = {
 const incidentName = (id: string) => id.replaceAll("-", " ");
 
 function BlindComparison({ blind }: { blind: BlindEvaluation }) {
+  const activeAnchor = useSyncExternalStore(
+    subscribeToTrial,
+    trialFromUrl,
+    noTrial,
+  );
   const total = (arm: "previous" | "revised") =>
     blind.byCause.reduce(
       (count, row) => ({
@@ -296,6 +301,12 @@ function BlindComparison({ blind }: { blind: BlindEvaluation }) {
           <details
             className={`${styles.panel} ${styles.blindCorrection}`}
             key={failureKey(previous)}
+            id={`blind-correction-${previous.incident}-${previous.trial}`}
+            open={
+              activeAnchor ===
+                `blind-correction-${previous.incident}-${previous.trial}` ||
+              undefined
+            }
           >
             <summary>
               {incidentName(previous.incident)} · Trial {previous.trial}

@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   use: { ...common.use, baseURL },
   webServer: {
-    command: "python3 -m http.server 3314 --bind 127.0.0.1 --directory out",
+    command: "python3 scripts/serve-static.py",
     url: baseURL,
     reuseExistingServer: false,
   },
