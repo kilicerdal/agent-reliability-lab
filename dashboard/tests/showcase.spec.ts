@@ -17,7 +17,7 @@ test("V1 investigation, V2 failure, and V3 replay use static evidence", async ({
     }
   });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "networkidle" });
   await expect(
     page.getByRole("heading", { name: "Inside an AI incident investigation." }),
   ).toBeVisible();
@@ -45,6 +45,28 @@ test("V1 investigation, V2 failure, and V3 replay use static evidence", async ({
   ).toBeVisible();
   await page.getByText("Inspect V2 failure trace").click();
   await expect(evaluation.getByText("timeout", { exact: true })).toBeVisible();
+
+  const matrix = evaluation.getByRole("table", {
+    name: "Correct, grounded diagnoses per prompt",
+  });
+  await expect(matrix.locator("tbody tr")).toHaveCount(8);
+  const invoice = matrix.getByRole("row").filter({ hasText: "invoice window" });
+  await expect(invoice.getByRole("cell")).toHaveText(["0/3", "2/3"]);
+  const orphan = matrix.getByRole("row").filter({ hasText: "orphan alert" });
+  await expect(orphan.getByRole("cell")).toHaveText(["1/3", "3/3"]);
+  const trial = evaluation.getByLabel("Failed trial");
+  await expect(trial.locator("option")).toHaveCount(6);
+  await trial.selectOption("orphan-alert/baseline/2");
+  await expect(
+    evaluation.getByText("worker_stopped", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    evaluation.getByText("dependency_config", { exact: true }),
+  ).toBeVisible();
+  await evaluation.getByText("Inspect V2 failure trace").click();
+  await expect(
+    evaluation.locator("summary").filter({ hasText: "read_deployments" }),
+  ).toBeVisible();
 
   const replay = page.locator("#replay-state");
   for (const [stage, state, order] of [

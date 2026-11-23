@@ -509,3 +509,47 @@
     font-size: clamp(2.75rem, 11vw, 3.25rem);
   }
 }
+
+.incidentPanel {
+  margin-top: 1rem;
+}
+.incidentPanel > p {
+  margin: 0 0 0.8rem;
+  color: var(--secondary);
+  font-size: 0.9rem;
+}
+.incidentTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.incidentTable caption {
+  text-align: left;
+  color: var(--secondary);
+  font-size: 0.8rem;
+  padding-bottom: 0.35rem;
+}
+.incidentTable :is(th, td) {
+  text-align: left;
+  padding: 0.55rem 0.35rem;
+  border-bottom: 1px solid var(--border);
+}
+.incidentTable tbody th {
+  text-transform: capitalize;
+  font-weight: 650;
+}
+.incidentTable tbody small {
+  display: block;
+  text-transform: none;
+  color: var(--secondary);
+  font-weight: 400;
+}
+.incidentTable td {
+  font-variant-numeric: tabular-nums;
+}
+.incidentTable tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.failurePanel select {
+  width: min(100%, 25rem);
+}
