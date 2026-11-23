@@ -37,6 +37,7 @@ def investigate(
     model=MODEL,
     deadline=None,
     max_requests=8,
+    followup=None,
 ):
     schema = response_model.model_json_schema()
     if cause_contract:
@@ -47,6 +48,7 @@ def investigate(
     messages = [{"role": "user", "content": alert}]
     start = time.monotonic()
     total = 0
+    forced_tool = None
     for step in range(max_requests):
         if deadline is not None and time.monotonic() >= deadline:
             raise TimeoutError("Investigation latency budget exhausted")
@@ -69,6 +71,9 @@ def investigate(
                 }
             },
         }
+        if forced_tool:
+            payload["tool_choice"] = {"type": "function", "name": forced_tool}
+            forced_tool = None
         if len(json.dumps(payload).encode()) > 80000:
             raise ValueError("Investigation context limit reached")
         rid = budget.reserve()
@@ -95,6 +100,17 @@ def investigate(
         calls = [o for o in response.output if o.type == "function_call"]
         if not calls:
             diagnosis = response_model.model_validate_json(response.output_text)
+            if followup is not None and step + 2 < max_requests:
+                forced_tool = followup(diagnosis, trace)
+                followup = None
+                if forced_tool:
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": f"Read {forced_tool} for the unresolved evidence, then update the diagnosis.",
+                        }
+                    )
+                    continue
             return (
                 diagnosis,
                 trace,

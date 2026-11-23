@@ -21,6 +21,8 @@ Built by **Erdal Kilic** with AI assistance for implementation, tests and docume
 
 **Agent assurance:** inspect the [citation grader, independent benchmark intake, real recovery comparisons, and database-scoped approval](docs/assurance.md).
 
+**Release evidence:** open the [release scorecard](docs/release-scorecard.md) or [reproduce the recorded results offline](docs/reproduce-evidence.md).
+
 **Independent evaluation:** use the [reviewer kit](docs/reviewer-kit/README.md) to author, seal, and grade blind incidents.
 
 ## Reviewer journey — five minutes

@@ -8,6 +8,8 @@ This checks the structured claims and quotations. General factual review of the 
 
 ## Independent benchmark intake
 
+The [scoped evidence and live selective-review report](scoped-reliability.md) covers the lab-authored stress tests and the controlled citation challenge.
+
 The [independent reviewer kit](reviewer-kit/README.md) supplies copyable templates, a per-claim scoring rubric, a worked weak-citation example, and private sealing and handoff instructions.
 
 An independent reviewer supplies two JSON arrays. The observations file holds cases with `id`, `alert`, and `tools`. Each tool maps to observations with `evidence_id` and `detail`. The answer file holds `id`, `cause`, `reviewer`, and `judgments`. A judgment has `kind` (mechanism or configuration), `evidence_id`, `verdict` (supports, contradicts, or irrelevant), and an exact `required_excerpt` for supportive judgments. One supported claim of each kind is required. For a multi-fault case, the reviewer identifies the primary cause where the evidence supports one and uses `unknown` where it does not.
@@ -33,6 +35,8 @@ python -m backend.reliability.verify_recovery evidence/assurance/live-recovery
 The first command uses the authorized key and the isolated application services. The second verifies the captured coverage, grades, observed timeout markers, cost estimates, and summary offline.
 
 ### Citation review experiment
+
+See the [promotion criteria and offline citation defect suite](citation-promotion.md) before deciding whether to enable second-pass review by default.
 
 Run `python -m backend.reliability.recovery_benchmark --citation-review --output .private/recovery-citation-review` to compare the existing support prompt with a second, tool-free citation review for both models. Both arms allow up to six investigation requests. The review can make one additional request within the same deadline. The review sees the proposed cause, original claims, and observed records. It can replace citations or reject the evidence, and the application checks that both replacement quotes appear in the observed records. The scoring rubric stays separate.
 

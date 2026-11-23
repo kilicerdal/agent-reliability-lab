@@ -38,6 +38,8 @@ The seal validates incident IDs, tool names, causes, evidence IDs, and the suppo
 
 ## 3. Run and grade the frozen suite
 
+For a promotion study, agree on the [promotion criteria and reviewer attestation](../citation-promotion.md) before sealing.
+
 The operator runs the paired mode at the recorded checkout. Choose and record the repeat count before running. The live benchmark uses API credits. An evaluator can inspect completed captures offline.
 
 ```sh

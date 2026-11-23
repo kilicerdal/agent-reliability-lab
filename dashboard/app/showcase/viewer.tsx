@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import styles from "./showcase.module.css";
+import PairedCitations, { type PairedEvidence } from "./paired-citations";
 import ModelComparison, { type RecoveryComparison } from "./model-comparison";
 
 type RecordItem = {
@@ -371,6 +372,7 @@ export default function Showcase({
   approval,
   blind,
   recoveryComparison,
+  pairedCitations,
 }: {
   investigations: Investigation[];
   comparison: Comparison;
@@ -379,6 +381,7 @@ export default function Showcase({
   approval: Approval;
   blind: BlindEvaluation;
   recoveryComparison: RecoveryComparison;
+  pairedCitations: PairedEvidence;
 }) {
   const [scenario, setScenario] = useState("worker-failure");
   const [stage, setStage] = useState(0);
@@ -423,6 +426,7 @@ export default function Showcase({
             <a href="#comparison">Evaluation</a>
             <a href="#blind-evaluation">Blind evaluation</a>
             <a href="#model-comparison">Model comparison</a>
+            <a href="#paired-citations">Citation review</a>
             <a href="#approval">Approval</a>
           </nav>
         </div>
@@ -690,6 +694,10 @@ export default function Showcase({
         </section>
         <BlindComparison blind={blind} />
         <ModelComparison comparison={recoveryComparison} />
+        <PairedCitations
+          evidence={pairedCitations}
+          comparison={recoveryComparison}
+        />
         <section
           id="approval"
           className={styles.section}

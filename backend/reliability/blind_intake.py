@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,6 +12,7 @@ from backend.lab.contracts import Diagnosis
 from backend.lab.tools import NAMES
 
 from .assurance import EvidenceJudgment
+from .incident_quality import EvidenceContext, IncidentWindow
 
 
 class Observation(BaseModel):
@@ -18,6 +20,7 @@ class Observation(BaseModel):
 
     evidence_id: str = Field(min_length=1)
     detail: str = Field(min_length=8)
+    context: EvidenceContext | None = None
 
 
 class Incident(BaseModel):
@@ -26,6 +29,10 @@ class Incident(BaseModel):
     id: str = Field(min_length=1)
     alert: str = Field(min_length=1)
     tools: dict[str, list[Observation]]
+    window: IncidentWindow | None = None
+    tool_conditions: dict[
+        str, Literal["timeout", "empty", "partial", "malformed", "unavailable"]
+    ] = Field(default_factory=dict)
 
 
 class Answer(BaseModel):
@@ -35,6 +42,7 @@ class Answer(BaseModel):
     cause: str
     reviewer: str = Field(min_length=1)
     judgments: list[EvidenceJudgment]
+    unsupported_phrases: list[str] = Field(default_factory=list)
 
 
 def load_suite(cases_path, key_path):
@@ -52,15 +60,13 @@ def load_suite(cases_path, key_path):
         raise ValueError("Exactly one separate answer is required per unique incident")
     causes = set(Diagnosis.model_json_schema()["properties"]["cause"]["enum"])
     for case in cases:
-        if set(case.tools) - set(NAMES):
+        if (set(case.tools) | set(case.tool_conditions)) - set(NAMES):
             raise ValueError(f"{case.id}: unrecognized tool")
         records = {}
         for observations in case.tools.values():
             for observation in observations:
-                previous = records.setdefault(
-                    observation.evidence_id, observation.detail
-                )
-                if previous != observation.detail:
+                previous = records.setdefault(observation.evidence_id, observation)
+                if previous != observation:
                     raise ValueError(f"{case.id}: evidence ID has inconsistent content")
         answer = key[case.id]
         judgments = {(item.kind, item.evidence_id) for item in answer.judgments}
@@ -74,7 +80,7 @@ def load_suite(cases_path, key_path):
             item.verdict == "supports"
             and (
                 not item.required_excerpt
-                or item.required_excerpt not in records[item.evidence_id]
+                or item.required_excerpt not in records[item.evidence_id].detail
             )
             for item in answer.judgments
         ):
@@ -92,6 +98,8 @@ def load_suite(cases_path, key_path):
     for name in (
         "agent.py",
         "assurance.py",
+        "blind_intake.py",
+        "incident_quality.py",
         "recovery_benchmark.py",
         "../lab/agent.py",
         "../lab/tools.py",
@@ -110,7 +118,34 @@ def load_suite(cases_path, key_path):
 def dispatch_observations(case, name, args):
     if name not in NAMES or args != {}:
         raise ValueError("Tool or arguments denied")
-    return {"records": [record.model_dump() for record in case.tools.get(name, ())]}
+    return {
+        "records": [
+            record.model_dump(mode="json", exclude_none=True)
+            for record in case.tools.get(name, ())
+        ]
+    }
+
+
+def incident_dispatch(case):
+    """Create isolated tool conditions for one trial of a sealed incident."""
+    attempted = set()
+
+    def dispatch(name, args):
+        result = dispatch_observations(case, name, args)
+        condition = case.tool_conditions.get(name)
+        first = name not in attempted
+        attempted.add(name)
+        if condition == "timeout" and first:
+            return {"error": "timeout", "retryable": True}
+        if condition in {"malformed", "unavailable"}:
+            return {"error": condition, "retryable": False}
+        if condition == "empty":
+            return {"records": []}
+        if condition == "partial":
+            return {"records": result["records"][:1], "partial": True}
+        return result
+
+    return dispatch
 
 
 def main():

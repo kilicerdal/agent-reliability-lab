@@ -235,6 +235,43 @@ const recoveryComparison = {
     insufficient: example(mismatch),
   },
 };
+const readCapture = async (name) =>
+  JSON.parse(await readFile(join(evidence, name), "utf8"));
+const blindCitation = await readCapture(
+  "assurance/citation-review-blind/summary.json",
+);
+const pairedSummary = await readCapture(
+  "assurance/citation-review-paired/summary.json",
+);
+const pairedRows = (
+  await readFile(
+    join(evidence, "assurance/citation-review-paired/runs.jsonl"),
+    "utf8",
+  )
+)
+  .trim()
+  .split("\n")
+  .map(JSON.parse);
+const pairedCitations = {
+  blind: blindCitation,
+  summary: pairedSummary,
+  trials: pairedRows.map((row) => ({
+    id: `${row.model}-${row.incident}-${row.repeat}`,
+    model: row.model,
+    incident: row.incident,
+    cause: row.diagnosis?.cause ?? "No diagnosis",
+    before: row.original_verdict,
+    after: row.verdict,
+    records: [
+      ...new Map(
+        row.trace
+          .filter((event) => event.type === "tool" && event.ok)
+          .flatMap((event) => event.result.records ?? [])
+          .map((record) => [record.evidence_id, record]),
+      ).values(),
+    ],
+  })),
+};
 await writeFile(
   resolve("app/showcase/recorded-data.json"),
   JSON.stringify({
@@ -245,5 +282,6 @@ await writeFile(
     approval,
     blind,
     recoveryComparison,
+    pairedCitations,
   }),
 );

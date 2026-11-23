@@ -8,11 +8,14 @@ from itertools import product
 from pathlib import Path
 
 from .assurance import EvidenceJudgment, SupportedDiagnosis, grade_claims
-from .recovery_benchmark import summarize_review_policies
+from .recovery_benchmark import RATES, summarize_review_policies
 
 
-def verify(folder):
+def verify(folder, *, announce=True):
     manifest = json.loads((folder / "manifest.json").read_text())
+    assert manifest["rates_per_million"] == {
+        model: list(rates) for model, rates in RATES.items()
+    }
     observations = json.loads((folder / "observations.json").read_text())
     answers = {
         answer["id"]: answer
@@ -30,10 +33,15 @@ def verify(folder):
     rows = [
         json.loads(line) for line in (folder / "runs.jsonl").read_text().splitlines()
     ]
-    assert Counter((row["incident"], row["model"]) for row in rows) == Counter(
-        product(answers, manifest["rates_per_million"])
+    assert Counter(
+        (row["incident"], row["model"], row["repeat"]) for row in rows
+    ) == Counter(
+        product(
+            answers, manifest["rates_per_million"], range(1, manifest["repeats"] + 1)
+        )
     )
     for row in rows:
+        assert row["prompt"] == "verify-citations"
         answer = answers[row["incident"]]
         rubric = [EvidenceJudgment.model_validate(item) for item in answer["judgments"]]
         assert row["expected"] == answer["cause"]
@@ -54,15 +62,28 @@ def verify(folder):
             verdict["passed"] = False
         assert verdict == row["verdict"]
         assert 0 <= row["initial_elapsed_ms"] <= row["elapsed_ms"]
+        rates = RATES[row["model"]]
+        for event in row["trace"]:
+            if event["type"] == "model":
+                assert (
+                    event["estimated_usd"]
+                    == (
+                        event["input_tokens"] * rates[0]
+                        + event["output_tokens"] * rates[1]
+                    )
+                    / 1_000_000
+                )
         assert row["estimated_usd"] == round(
             sum(event.get("estimated_usd", 0) for event in row["trace"]), 6
         )
     assert summarize_review_policies(rows) == json.loads(
         (folder / "summary.json").read_text()
     )
-    print(
-        f"Verified {len(rows)} paired citation trials and all three policy summaries."
-    )
+    if announce:
+        print(
+            f"Verified {len(rows)} paired citation trials and all three policy summaries."
+        )
+    return manifest, rows
 
 
 if __name__ == "__main__":

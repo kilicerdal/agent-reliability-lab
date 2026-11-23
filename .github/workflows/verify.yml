@@ -48,6 +48,8 @@ jobs:
           python -m backend.reliability.verify_recovery evidence/assurance/citation-review-fixed-cap
           python -m backend.reliability.verify_recovery evidence/assurance/citation-review-matched-budget
           python -m backend.reliability.verify_paired_citations evidence/assurance/citation-review-paired
+          python -m backend.reliability.quality_report evidence/assurance/selective-stress > "${RUNNER_TEMP}/selective-quality.json"
+          cmp "${RUNNER_TEMP}/selective-quality.json" evidence/assurance/selective-stress/quality.json
       - name: Start synthetic inventory
         run: |
           python -m uvicorn lab.inventory:app --host 127.0.0.1 --port 8811 > /tmp/inventory.log 2>&1 &

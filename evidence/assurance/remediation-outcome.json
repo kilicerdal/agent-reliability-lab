@@ -1,0 +1,32 @@
+{
+  "scope": "Synthetic PostgreSQL and HTTP inventory with scripted operator confirmation",
+  "approval": "applied",
+  "before": {
+    "worker_enabled": false,
+    "order_status": "queued",
+    "restart_events": 0,
+    "completion_events": 0
+  },
+  "after_restart_with_inventory_fault": {
+    "worker_enabled": true,
+    "order_status": "queued",
+    "restart_events": 1,
+    "completion_events": 0
+  },
+  "outcome_with_inventory_fault": {
+    "action_applied": true,
+    "workload_recovered": false,
+    "order_status": "queued"
+  },
+  "after_fixture_restores_inventory": {
+    "worker_enabled": true,
+    "order_status": "completed",
+    "restart_events": 1,
+    "completion_events": 1
+  },
+  "outcome_after_fixture_restores_inventory": {
+    "action_applied": true,
+    "workload_recovered": true,
+    "order_status": "completed"
+  }
+}
