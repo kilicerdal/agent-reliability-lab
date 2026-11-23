@@ -34,6 +34,8 @@ for (const [source, name] of [
   ["assurance/database-boundary.json", "scoped-approval.json"],
   ["assurance/live-escalation/runs.jsonl", "live-escalation-traces.jsonl"],
   ["assurance/live-escalation/summary.json", "live-escalation-summary.json"],
+  ["assurance/evidence-handoff/runs.jsonl", "evidence-handoff-traces.jsonl"],
+  ["assurance/evidence-handoff/summary.json", "evidence-handoff-summary.json"],
 ]) {
   await copyFile(join(evidence, source), join(destination, name));
 }
@@ -311,6 +313,7 @@ await writeFile(
     blind,
     recoveryComparison,
     pairedCitations,
+    handoff: await readCapture("assurance/evidence-handoff/summary.json"),
     liveEscalation: await readCapture("assurance/live-escalation/summary.json"),
   }),
 );

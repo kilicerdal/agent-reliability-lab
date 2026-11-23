@@ -370,3 +370,36 @@ test("the live escalation report and traces are served as static evidence", asyn
   expect((await traces.text()).trim().split("\n")).toHaveLength(12);
   expect(nonStatic).toEqual([]);
 });
+
+test("handoff decisions are backed by static traces", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/#evidence-handoff");
+  const section = page.locator("#evidence-handoff");
+  await expect(
+    section.getByRole("heading", { name: "Held at the decision gate" }),
+  ).toBeVisible();
+  await expect(
+    section.getByText("Fresh reads fell from 16 to 13", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    section.getByRole("row").filter({ hasText: "Restart Sol" }),
+  ).toContainText("11/12");
+  await expect(
+    section.getByRole("row").filter({ hasText: "Pass Luna’s evidence to Sol" }),
+  ).toContainText("10/12");
+  const href = await section
+    .getByRole("link", { name: "All eight Sol traces" })
+    .getAttribute("href");
+  const traces = await request.get(href!);
+  expect(traces.ok()).toBe(true);
+  const lines = (await traces.text()).trim().split("\n");
+  expect(lines).toHaveLength(4);
+  expect(
+    lines.every((line) => {
+      const row = JSON.parse(line);
+      return row.restart && row.handoff;
+    }),
+  ).toBe(true);
+});
