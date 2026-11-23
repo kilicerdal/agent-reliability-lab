@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import styles from "./showcase.module.css";
 
 type RecordItem = {
@@ -58,6 +58,15 @@ const armLabels: Record<string, string> = {
   recovery: "Recovery prompt",
 };
 const failureKey = (run: Failure) => `${run.incident}/${run.arm}/${run.trial}`;
+const trialId = (key: string) => `failed-trial-${key}`;
+const trialHref = (key: string) => `#${trialId(key)}`;
+const trialFromUrl = () => window.location.hash.slice(1);
+const noTrial = () => "";
+const subscribeToHydration = () => () => {};
+function subscribeToTrial(callback: () => void) {
+  window.addEventListener("hashchange", callback);
+  return () => window.removeEventListener("hashchange", callback);
+}
 type Failure = {
   incident: string;
   arm: string;
@@ -221,15 +230,23 @@ export default function Showcase({
 }) {
   const [scenario, setScenario] = useState("worker-failure");
   const [stage, setStage] = useState(0);
-  const [failedTrial, setFailedTrial] = useState(() =>
-    failureKey(
-      failures.find(
-        (trial) =>
-          trial.incident === "invoice-window" && trial.arm === "recovery",
-      )!,
-    ),
+  const ready = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
   );
-  const failure = failures.find((trial) => failureKey(trial) === failedTrial)!;
+  const requestedTrial = useSyncExternalStore(
+    subscribeToTrial,
+    trialFromUrl,
+    noTrial,
+  );
+  const failure =
+    failures.find((trial) => trialId(failureKey(trial)) === requestedTrial) ??
+    failures.find(
+      (trial) =>
+        trial.incident === "invoice-window" && trial.arm === "recovery",
+    )!;
+  const failedTrial = failureKey(failure);
   const selectedFailureTitle =
     failure.incident === "invoice-window" &&
     failure.diagnosis?.cause === "dependency_config"
@@ -310,6 +327,7 @@ export default function Showcase({
                 <label htmlFor="case-select">Recorded case</label>
                 <select
                   id="case-select"
+                  disabled={!ready}
                   value={scenario}
                   onChange={(event) => setScenario(event.target.value)}
                 >
@@ -456,13 +474,24 @@ export default function Showcase({
             </table>
           </div>
           <div className={`${styles.panel} ${styles.failurePanel}`}>
+            {failures.map((trial) => (
+              <span
+                key={failureKey(trial)}
+                id={trialId(failureKey(trial))}
+                className={styles.trialAnchor}
+                aria-hidden="true"
+              />
+            ))}
             <div className={styles.panelHead}>
               <div>
                 <label htmlFor="failure-select">Failed trial</label>
                 <select
                   id="failure-select"
+                  disabled={!ready}
                   value={failedTrial}
-                  onChange={(event) => setFailedTrial(event.target.value)}
+                  onChange={(event) =>
+                    (window.location.hash = trialHref(event.target.value))
+                  }
                 >
                   {failures.map((trial) => (
                     <option key={failureKey(trial)} value={failureKey(trial)}>
@@ -475,6 +504,9 @@ export default function Showcase({
               <span className={styles.failure}>Failed grading</span>
             </div>
             <h3>{selectedFailureTitle}</h3>
+            <p className={styles.trialLink}>
+              <a href={trialHref(failedTrial)}>Link to this trial</a>
+            </p>
             <dl className={styles.labels}>
               <div>
                 <dt>Expected cause</dt>
@@ -521,6 +553,7 @@ export default function Showcase({
                 <li key={item.key}>
                   <button
                     type="button"
+                    disabled={!ready}
                     aria-pressed={stage === index}
                     aria-controls="replay-state"
                     onClick={() => setStage(index)}
