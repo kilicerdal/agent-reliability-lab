@@ -5,7 +5,9 @@ import pytest
 from backend.lab.contracts import Diagnosis
 from backend.reliability.evaluate import FIXTURES, IncidentTools, grade
 
-CASES = json.loads(FIXTURES.read_text())
+CASES = json.loads(FIXTURES.read_text()) + json.loads(
+    FIXTURES.with_name("mixed-signals.json").read_text()
+)
 
 
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case["id"])

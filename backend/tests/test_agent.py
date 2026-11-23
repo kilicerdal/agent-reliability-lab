@@ -5,6 +5,9 @@ import pytest
 from lab import agent
 from lab.budget import Budget
 
+from backend.reliability.agent import CAUSE_GUIDE
+from backend.reliability.agent import investigate as investigate_reliability
+
 
 class Item:
     def __init__(self, **kwargs):
@@ -97,3 +100,31 @@ def test_step_limit_stops_repeated_tools(tmp_path, monkeypatch):
             "e", "Alert", SimpleNamespace(responses=r), Budget(tmp_path / "b.db")
         )
     assert len(r.payloads) == 8
+
+
+def test_cause_contract_describes_each_enum_without_changing_validation(tmp_path):
+    requests = []
+    for use_contract in (False, True):
+        provider = Responses([response([], answer())])
+        diagnosis, _, _ = investigate_reliability(
+            "Investigate this alert",
+            lambda *_: pytest.fail("No tool was requested"),
+            SimpleNamespace(responses=provider),
+            Budget(tmp_path / "budget.db"),
+            improved=True,
+            trace=[],
+            cause_contract=use_contract,
+        )
+        assert diagnosis.cause == "unknown"
+        requests.append(provider.payloads[0])
+    original, candidate = requests
+    original_cause = original["text"]["format"]["schema"]["properties"]["cause"]
+    candidate_cause = candidate["text"]["format"]["schema"]["properties"]["cause"]
+    assert "description" not in original_cause
+    description = candidate_cause.pop("description")
+    assert candidate_cause == original_cause
+    assert set(original_cause["enum"]) == CAUSE_GUIDE.keys()
+    for label, definition in CAUSE_GUIDE.items():
+        assert f"{label}: {definition}" in description
+    assert "causal subsystem" in candidate["instructions"]
+    assert "expected_cause" not in json.dumps(requests)

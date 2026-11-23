@@ -8,6 +8,20 @@ from backend.lab.tools import TOOLS
 RECOVERY = """ If a tool reports a retryable timeout, retry that tool once. If a source is unavailable, use other read tools and their independent observations. Prefer current direct measurements to stale summaries, and cite corroboration from both workload and configuration when available. If essential evidence is absent or current credible observations still conflict, choose unknown and cite what limits your conclusion."""
 
 
+CAUSE_GUIDE = {
+    "db_latency": "The database query path causes the delay, including a configured SQL delay.",
+    "worker_stopped": "The fulfillment worker is stopped or disabled, leaving work queued.",
+    "dependency_config": "An external service dependency is misconfigured, such as an inventory route.",
+    "healthy": "Current observations support normal operation.",
+    "unknown": "Available evidence does not establish which cause applies.",
+}
+CAUSE_CONTRACT = (
+    " Before returning the diagnosis, match the causal subsystem in your explanation "
+    "to the exact cause label in the schema. Choose the label for the mechanism "
+    "that explains the observations. A configuration change can affect any subsystem."
+)
+
+
 def investigate(
     alert,
     dispatch,
@@ -18,7 +32,14 @@ def investigate(
     trace,
     tools=TOOLS,
     instructions=PROMPT,
+    cause_contract=False,
 ):
+    schema = Diagnosis.model_json_schema()
+    if cause_contract:
+        schema["properties"]["cause"]["description"] = " ".join(
+            f"{label}: {meaning}" for label, meaning in CAUSE_GUIDE.items()
+        )
+        instructions += CAUSE_CONTRACT
     messages = [{"role": "user", "content": alert}]
     start = time.monotonic()
     total = 0
@@ -37,7 +58,7 @@ def investigate(
                 "format": {
                     "type": "json_schema",
                     "name": "diagnosis",
-                    "schema": Diagnosis.model_json_schema(),
+                    "schema": schema,
                     "strict": True,
                 }
             },

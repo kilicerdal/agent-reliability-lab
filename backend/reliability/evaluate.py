@@ -96,7 +96,7 @@ def grade(case, diagnosis, trace):
     }
 
 
-def trial(case, number, improved, client, budget):
+def trial(case, number, arm, client, budget):
     trace = []
     started = time.monotonic()
     diagnosis = None
@@ -107,7 +107,8 @@ def trial(case, number, improved, client, budget):
             IncidentTools(case),
             client,
             budget,
-            improved=improved,
+            improved=arm != "baseline",
+            cause_contract=arm == "cause-contract",
             trace=trace,
         )
     except (ValidationError, RuntimeError) as exc:
@@ -118,7 +119,7 @@ def trial(case, number, improved, client, budget):
         "incident": case["id"],
         "failure": case["failure"],
         "trial": number,
-        "arm": "recovery" if improved else "baseline",
+        "arm": arm,
         "expected": case["cause"],
         "diagnosis": diagnosis.model_dump() if diagnosis else None,
         "error": error,
@@ -129,9 +130,9 @@ def trial(case, number, improved, client, budget):
     }
 
 
-def summarize(rows):
+def summarize(rows, arms=("baseline", "recovery")):
     summaries = {}
-    for arm in ("baseline", "recovery"):
+    for arm in arms:
         runs = [row for row in rows if row["arm"] == arm]
         groups = {"all": runs}
         for failure in sorted({row["failure"] for row in runs}):
@@ -165,13 +166,22 @@ def main():
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--env-file", type=Path)
+    parser.add_argument("--fixtures", type=Path, default=FIXTURES)
+    parser.add_argument("--compare", choices=("v2", "cause-contract"), default="v2")
     args = parser.parse_args()
     if not 1 <= args.repeats <= 5:
         parser.error("--repeats must be between 1 and 5")
     if args.env_file:
         load_dotenv(args.env_file, override=False)
-    raw = FIXTURES.read_bytes()
+    raw = args.fixtures.read_bytes()
     cases = [case for case in json.loads(raw) if case["split"] == args.split]
+    arms = (
+        ("recovery", "cause-contract")
+        if args.compare == "cause-contract"
+        else ("baseline", "recovery")
+    )
+    if not cases:
+        parser.error("No fixtures match the selected split")
     rows = []
     budget = Budget()
     client = OpenAI(max_retries=0, timeout=45)
@@ -185,10 +195,10 @@ def main():
             return trial(*job, client, budget)
 
         jobs = (
-            (case, number, improved)
+            (case, number, arm)
             for number in range(1, args.repeats + 1)
             for index, case in enumerate(cases)
-            for improved in ((False, True) if (index + number) % 2 else (True, False))
+            for arm in (arms if (index + number) % 2 else reversed(arms))
         )
         for row in executor.map(run_trial, jobs):
             rows.append(row)
@@ -205,7 +215,7 @@ def main():
         "split": args.split,
         "repeats": args.repeats,
         "fixture_sha256": hashlib.sha256(raw).hexdigest(),
-        "arms": summarize(rows),
+        "arms": summarize(rows, arms),
     }
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
