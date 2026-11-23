@@ -553,3 +553,15 @@
 .failurePanel select {
   width: min(100%, 25rem);
 }
+.trialLink {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+.trialLink a {
+  color: var(--green);
+  text-underline-offset: 3px;
+}
+.trialAnchor {
+  display: block;
+  scroll-margin-top: 2rem;
+}

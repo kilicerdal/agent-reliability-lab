@@ -1,6 +1,6 @@
 # V4 recorded evidence viewer
 
-The static viewer opens on V1’s captured worker failure. Visitors can switch among four recorded investigations, expand tool events, and inspect the evidence behind the independent verdict. V2 compares the two prompts by incident and opens on the recorded invoice-window failure. The selector exposes every failed trial, with its expected and returned cause, citations, and raw trace. The build checks that the incident counts reconcile with the recorded scorecard. V3 replays the worker state across request, rejection, approval, and completion. The replay controls only select captured snapshots.
+The static viewer opens on V1’s captured worker failure. Visitors can switch among four recorded investigations, expand tool events, and inspect the evidence behind the independent verdict. V2 compares the two prompts by incident and opens on the recorded invoice-window failure. The selector exposes every failed trial, with its expected and returned cause, citations, and raw trace. Each failure has a shareable URL that restores its selection on reload; unrecognized trial IDs open the default failure. The build checks that the incident counts reconcile with the recorded scorecard. V3 replays the worker state across request, rejection, approval, and completion. The replay controls only select captured snapshots.
 
 ## Build and preview
 

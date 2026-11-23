@@ -68,6 +68,22 @@ test("V1 investigation, V2 failure, and V3 replay use static evidence", async ({
     evaluation.locator("summary").filter({ hasText: "read_deployments" }),
   ).toBeVisible();
 
+  const permalink = "#failed-trial-orphan-alert/baseline/2";
+  await expect(
+    page.getByRole("link", { name: "Link to this trial" }),
+  ).toHaveAttribute("href", permalink);
+  await expect(page).toHaveURL(new URL(permalink, page.url()).href);
+  await page.goBack();
+  await expect(trial).toHaveValue("invoice-window/recovery/3");
+  await page.goForward();
+  await expect(trial).toHaveValue("orphan-alert/baseline/2");
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(trial).toHaveValue("orphan-alert/baseline/2");
+  await page.goto("/#failed-trial-does-not-exist", {
+    waitUntil: "networkidle",
+  });
+  await expect(trial).toHaveValue("invoice-window/recovery/3");
+
   const replay = page.locator("#replay-state");
   for (const [stage, state, order] of [
     ["Request pending", "Disabled", "queued"],
@@ -108,6 +124,9 @@ test("public viewer supports keyboard navigation and accessibility", async ({
   ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#evidence-main")).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "Order completed" }),
+  ).toBeEnabled();
   await page.getByRole("button", { name: "Order completed" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#replay-state")).toContainText("Order completed");
