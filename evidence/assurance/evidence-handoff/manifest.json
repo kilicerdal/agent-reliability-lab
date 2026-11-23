@@ -1,0 +1,11 @@
+{
+  "baseline_sha256": "106559a689bd1d3c22f5435221f9728d5290da5ed6e44f5bfcec5c7ac3d4e34c",
+  "policy_sha256": "1d3c7b22115f262e15dae25eb67ab2290be8e9f705db8da04e07c1a1bc0d5a76",
+  "suite": {
+    "cases": 12,
+    "protocol_sha256": "29ed0a9b5c665e7654ee8bf8de8423ec6ab4b5979688cbf98c109596ede96078",
+    "observations_sha256": "ed7aea447d1717eefc8718e383e7c3f6a29d80a933faaa698cf10ce71f6eff70",
+    "answer_key_sha256": "994c5b471868bb2f25d6410ebab4b3e7f500db99f1b82df19be1e07abde1b1ee"
+  },
+  "workers": 4
+}
