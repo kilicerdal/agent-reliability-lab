@@ -1,0 +1,252 @@
+[
+  {
+    "id": "read-fence",
+    "split": "holdout",
+    "cause": "db_latency",
+    "alert": "Stock reservations slowed after a reliability change.",
+    "signal": "Inventory stays below 40 ms; order lookups spend 960 ms inside PostgreSQL.",
+    "setting": "The active query setting adds a 900 ms SQL wait.",
+    "failure": "timeout",
+    "tool": "read_logs"
+  },
+  {
+    "id": "catalog-rebuild",
+    "split": "holdout",
+    "cause": "db_latency",
+    "alert": "The dashboard flags catalog while lookups degrade.",
+    "signal": "Catalog probes succeed and workers drain orders. PostgreSQL records a 720 ms lookup wait.",
+    "setting": "The lookup query plan lost an index. Catalog routing is unchanged.",
+    "failure": "missing",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "customer-region-switch",
+    "split": "holdout",
+    "cause": "db_latency",
+    "alert": "A geography switch coincided with a slow order page.",
+    "signal": "Inventory responds normally from both regions. The order trace spends over 1 second at the SQL layer.",
+    "setting": "The regional rollout enabled a database delay flag.",
+    "failure": "conflict",
+    "tool": "read_logs"
+  },
+  {
+    "id": "lock-queue",
+    "split": "holdout",
+    "cause": "db_latency",
+    "alert": "The queue rose after a supplier deployment.",
+    "signal": "SQL statements wait on a PostgreSQL lock; workers complete unrelated orders and inventory probes succeed.",
+    "setting": "The active database migration holds the order table lock.",
+    "failure": "conflict",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "checkout-read-path",
+    "split": "holdout",
+    "cause": "db_latency",
+    "alert": "Some checkout reads miss deadlines while writes succeed.",
+    "signal": "Inventory returns quickly before an order-read query that takes 810 ms.",
+    "setting": "The order-read query applies an 800 ms SQL delay.",
+    "failure": "none",
+    "tool": "read_health"
+  },
+  {
+    "id": "zero-worker-pool",
+    "split": "holdout",
+    "cause": "worker_stopped",
+    "alert": "Accepted orders remain pending after a fleet edit.",
+    "signal": "Submissions and SQL return in budget. No fulfillment heartbeat or completed order appears.",
+    "setting": "The rollout reduced the fulfillment pool to zero replicas.",
+    "failure": "missing",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "drain-never-resumed",
+    "split": "holdout",
+    "cause": "worker_stopped",
+    "alert": "Fulfillment didn\u2019t recover following maintenance.",
+    "signal": "Inventory checks are healthy, but orders age without worker polls.",
+    "setting": "The maintenance job left the worker paused.",
+    "failure": "conflict",
+    "tool": "read_logs"
+  },
+  {
+    "id": "consumer-switch",
+    "split": "holdout",
+    "cause": "worker_stopped",
+    "alert": "A regional error alert and missing shipments appeared together.",
+    "signal": "Inventory returns 200 and SQL is fast. No consumer heartbeat exists for the incident window.",
+    "setting": "The consumer enable flag is off. The regional alert was emitted by an earlier deployment.",
+    "failure": "conflict",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "dispatch-profile",
+    "split": "holdout",
+    "cause": "worker_stopped",
+    "alert": "Users report the stock service down because orders are stuck.",
+    "signal": "Orders never leave the accepted queue. Stock probes and order lookups both succeed.",
+    "setting": "The active profile disables the fulfillment consumer.",
+    "failure": "none",
+    "tool": "read_health"
+  },
+  {
+    "id": "maintenance-flag",
+    "split": "holdout",
+    "cause": "worker_stopped",
+    "alert": "Order acknowledgements are healthy but shipments stopped.",
+    "signal": "The API accepted orders without any worker polling. Stock and database probes completed normally.",
+    "setting": "The worker maintenance flag prevents dispatch from starting.",
+    "failure": "timeout",
+    "tool": "read_logs"
+  },
+  {
+    "id": "inventory-zone",
+    "split": "holdout",
+    "cause": "dependency_config",
+    "alert": "Order work backed up after a database configuration commit.",
+    "signal": "SQL completes in 22 ms and workers poll normally. The current stock endpoint returns 503.",
+    "setting": "Inventory routes to a region absent from the dependency configuration.",
+    "failure": "conflict",
+    "tool": "read_logs"
+  },
+  {
+    "id": "catalog-alias",
+    "split": "holdout",
+    "cause": "dependency_config",
+    "alert": "The order page says processing is slow after a worker rollout.",
+    "signal": "Worker heartbeats and SQL are healthy. Reservation calls return an unsupported-market response.",
+    "setting": "The catalog dependency alias points to a retired market.",
+    "failure": "conflict",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "freight-registry",
+    "split": "holdout",
+    "cause": "dependency_config",
+    "alert": "An old summary blames a database delay for today\u2019s backlog.",
+    "signal": "SQL spans are under 30 ms. Workers reach freight, where the selected registry returns 503.",
+    "setting": "The freight endpoint references a region this service does not support.",
+    "failure": "none",
+    "tool": "read_health"
+  },
+  {
+    "id": "stock-route-v2",
+    "split": "holdout",
+    "cause": "dependency_config",
+    "alert": "The queue alerts after a query tuning rollout.",
+    "signal": "SQL is faster. Workers retry every order because stock checks fail on the active route.",
+    "setting": "The stock route uses an invalid version prefix. A direct probe on the supported prefix returns 200.",
+    "failure": "timeout",
+    "tool": "read_logs"
+  },
+  {
+    "id": "warehouse-endpoint",
+    "split": "holdout",
+    "cause": "dependency_config",
+    "alert": "Fulfillment stalls even though pods remain healthy.",
+    "signal": "Workers poll and SQL is normal. Warehouse lookups fail for the configured host while the documented host responds.",
+    "setting": "The dependency uses a retired warehouse DNS alias.",
+    "failure": "missing",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "dashboard-lag",
+    "split": "holdout",
+    "cause": "healthy",
+    "alert": "Monitoring displays a growing queue after a rollout.",
+    "signal": "Direct probes show no queued work, successful inventory calls, completed orders and in-budget SQL.",
+    "setting": "The worker is enabled, the route is supported and SQL delay is off; the dashboard cache is old.",
+    "failure": "conflict",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "delayed-page",
+    "split": "holdout",
+    "cause": "healthy",
+    "alert": "A page about slow SQL arrived after shift change.",
+    "signal": "Current lookups are under 45 ms, with current heartbeats and completed orders.",
+    "setting": "The query-delay override was removed before the new window; worker and inventory settings are healthy.",
+    "failure": "none",
+    "tool": "read_health"
+  },
+  {
+    "id": "shipment-canary",
+    "split": "holdout",
+    "cause": "healthy",
+    "alert": "A canary triggered a generic timeout warning.",
+    "signal": "Current direct canary probes show completed shipments, active workers and healthy SQL and inventory.",
+    "setting": "The canary uses a supported route and enabled worker. There is no current delay override.",
+    "failure": "timeout",
+    "tool": "read_logs"
+  },
+  {
+    "id": "replayed-error",
+    "split": "holdout",
+    "cause": "healthy",
+    "alert": "An error report showed a dependency 503 after a deployment.",
+    "signal": "Current routes return 200, the queue is empty after completion and SQL is in budget.",
+    "setting": "The active fleet uses the supported route; the 503 belonged to a retired revision.",
+    "failure": "missing",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "shift-end-check",
+    "split": "holdout",
+    "cause": "healthy",
+    "alert": "Operations asks whether a pause is still present after maintenance.",
+    "signal": "Worker heartbeats are active and new orders complete. SQL and inventory are in budget.",
+    "setting": "Maintenance is cleared and current worker and inventory settings are healthy.",
+    "failure": "conflict",
+    "tool": "read_logs"
+  },
+  {
+    "id": "sampling-blackout",
+    "split": "holdout",
+    "cause": "unknown",
+    "alert": "One team saw slow reads and another mentioned dependency errors.",
+    "signal": "Sampling was offline. Only conflicting manual reports without trace IDs remain.",
+    "setting": "The rollout revision is known, but effective settings are unavailable.",
+    "failure": "insufficient",
+    "tool": "read_health"
+  },
+  {
+    "id": "partial-region-log",
+    "split": "holdout",
+    "cause": "unknown",
+    "alert": "Some orders were reported delayed in one region.",
+    "signal": "Only an aggregate count outside the incident window survives. There are no spans, heartbeats or probes.",
+    "setting": "Regional configuration history was unavailable for the interval.",
+    "failure": "timeout",
+    "tool": "read_logs"
+  },
+  {
+    "id": "disputed-fixture",
+    "split": "holdout",
+    "cause": "unknown",
+    "alert": "Inventory and database teams disagree about the delay.",
+    "signal": "Two uncorrelated summaries mention different subsystems. Neither has timings or order IDs.",
+    "setting": "The deployment includes candidate changes to both subsystems. Activation and timing are unverified.",
+    "failure": "missing",
+    "tool": "read_deployments"
+  },
+  {
+    "id": "orphaned-alert",
+    "split": "holdout",
+    "cause": "unknown",
+    "alert": "A generic order delay alarm fired without a usable sample.",
+    "signal": "The affected order was not captured. Subsequent probes were taken only after rollback.",
+    "setting": "Rollback changed multiple settings; causation is unverified.",
+    "failure": "conflict",
+    "tool": "read_logs"
+  },
+  {
+    "id": "incomplete-order-span",
+    "split": "holdout",
+    "cause": "unknown",
+    "alert": "An order timed out close to a deployment.",
+    "signal": "The trace ends at ingress. No downstream timings distinguish worker, SQL or routing issues.",
+    "setting": "The deployment record contains only a revision ID and no effective settings.",
+    "failure": "conflict",
+    "tool": "read_deployments"
+  }
+]
