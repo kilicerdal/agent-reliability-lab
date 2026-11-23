@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import styles from "./showcase.module.css";
+import HandoffComparison, { type HandoffEvidence } from "./handoff-comparison";
 import LiveEscalation, { type EscalationEvidence } from "./live-escalation";
 import PairedCitations, { type PairedEvidence } from "./paired-citations";
 import ModelComparison, { type RecoveryComparison } from "./model-comparison";
@@ -375,6 +376,7 @@ export default function Showcase({
   recoveryComparison,
   pairedCitations,
   liveEscalation,
+  handoff,
 }: {
   investigations: Investigation[];
   comparison: Comparison;
@@ -385,6 +387,7 @@ export default function Showcase({
   recoveryComparison: RecoveryComparison;
   pairedCitations: PairedEvidence;
   liveEscalation: EscalationEvidence;
+  handoff: HandoffEvidence;
 }) {
   const [scenario, setScenario] = useState("worker-failure");
   const [stage, setStage] = useState(0);
@@ -703,6 +706,7 @@ export default function Showcase({
           comparison={recoveryComparison}
         />
         <LiveEscalation evidence={liveEscalation} />
+        <HandoffComparison evidence={handoff} />
         <section
           id="approval"
           className={styles.section}
