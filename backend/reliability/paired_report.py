@@ -66,7 +66,7 @@ def score(rows):
         if arms["cause-contract"]["passed"] < arms["recovery"]["passed"]
     ]
     return {
-        "paired_outcomes": dict(outcomes),
+        "paired_outcomes": dict(sorted(outcomes.items())),
         "net_strict_passes": net_passes,
         "by_cause": by_cause,
         "by_incident": by_incident,

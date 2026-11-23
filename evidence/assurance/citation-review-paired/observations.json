@@ -1,0 +1,290 @@
+[
+  {
+    "id": "dispatch-worker",
+    "alert": "Dispatch tasks accumulate before the morning window.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "dispatch-worker-7",
+          "detail": "The sampled dispatch queue has no active consumers and no job starts."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "dispatch-worker-3",
+          "detail": "The active dispatch deployment has zero worker replicas."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "dispatch-worker-5",
+          "detail": "SQL requests still meet their latency target."
+        }
+      ]
+    }
+  },
+  {
+    "id": "digest-worker",
+    "alert": "Daily digests enqueue normally but never send.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "digest-worker-7",
+          "detail": "Digest consumer heartbeats stop at the start of the affected interval."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "digest-worker-3",
+          "detail": "The effective service state shows the digest worker is disabled."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "digest-worker-5",
+          "detail": "A historical incident blamed mail relay latency."
+        }
+      ]
+    }
+  },
+  {
+    "id": "sequence-worker",
+    "alert": "Number allocation jobs remain pending.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "sequence-worker-7",
+          "detail": "Allocation jobs never start and the current broker consumer group is empty."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "sequence-worker-3",
+          "detail": "The scheduler currently keeps all allocation workers paused."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "sequence-worker-5",
+          "detail": "The current write database remains within target."
+        }
+      ]
+    }
+  },
+  {
+    "id": "sync-worker",
+    "alert": "Inventory reconciliation jobs are accepted but remain pending.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "sync-worker-7",
+          "detail": "All sync consumer leases expired and there are no starts for current jobs."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "sync-worker-3",
+          "detail": "The running reconciliation deployment scales its worker pool to zero."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "sync-worker-5",
+          "detail": "A stale dashboard card blames the inventory API."
+        }
+      ]
+    }
+  },
+  {
+    "id": "packing-worker",
+    "alert": "Package packing work is delayed after a host restart.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "packing-worker-7",
+          "detail": "The packing queue has zero connected workers across three current snapshots."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "packing-worker-3",
+          "detail": "The active packing worker unit is masked after the host restart."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "packing-worker-5",
+          "detail": "The packing database accepts queries normally."
+        }
+      ]
+    }
+  },
+  {
+    "id": "notice-worker",
+    "alert": "Outbound notices remain in the pending queue.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "notice-worker-7",
+          "detail": "Current notice traces show no job starts and no consumer heartbeat."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "notice-worker-3",
+          "detail": "The active notice scheduler explicitly suspends the notice worker."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "notice-worker-5",
+          "detail": "A cached report says old notice traffic hit a slow upstream."
+        }
+      ]
+    }
+  },
+  {
+    "id": "renewal-lock",
+    "alert": "Renewal operations take over a second.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "renewal-lock-7",
+          "detail": "Renewal SQL waits 1.1 seconds for a row lock after a fast upstream reply."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "renewal-lock-3",
+          "detail": "The effective renewal reconciliation job holds that row lock during the observed interval."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "renewal-lock-5",
+          "detail": "Renewal workers continue to process unrelated jobs."
+        }
+      ]
+    }
+  },
+  {
+    "id": "session-spill",
+    "alert": "Session report reads slow down during a rollout.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "session-spill-7",
+          "detail": "Current report traces show 1.3 seconds spent on SQL sort spill I/O."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "session-spill-3",
+          "detail": "Effective report sessions use a work memory setting below the current sort requirement."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "session-spill-5",
+          "detail": "A historical alert mentions an unrelated worker drain."
+        }
+      ]
+    }
+  },
+  {
+    "id": "voucher-endpoint",
+    "alert": "Voucher validation fails in one environment.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "voucher-endpoint-7",
+          "detail": "The upstream returns 404 on every validation request to the old route."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "voucher-endpoint-3",
+          "detail": "The running voucher client still targets the retired validation endpoint."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "voucher-endpoint-5",
+          "detail": "SQL and worker throughput remain normal."
+        }
+      ]
+    }
+  },
+  {
+    "id": "calendar-host",
+    "alert": "Calendar availability checks return the wrong response.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "calendar-host-7",
+          "detail": "The provider returns a host mismatch on the configured calendar route."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "calendar-host-3",
+          "detail": "The running client sends the retired calendar host in its upstream request."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "calendar-host-5",
+          "detail": "A cached queue report names a prior outage."
+        }
+      ]
+    }
+  },
+  {
+    "id": "normal-reservation",
+    "alert": "A dashboard reports that reservations might be backlogged.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "normal-reservation-7",
+          "detail": "Current reservations finish within the normal target and no pending backlog remains."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "normal-reservation-3",
+          "detail": "The effective reservation configuration matches the verified healthy baseline."
+        }
+      ],
+      "read_queue": [
+        {
+          "evidence_id": "normal-reservation-5",
+          "detail": "Yesterday's cached dashboard shows a backlog that has already cleared."
+        }
+      ]
+    }
+  },
+  {
+    "id": "ingest-disagreement",
+    "alert": "Cannot determine why a brief ingestion gap occurred.",
+    "tools": {
+      "read_logs": [
+        {
+          "evidence_id": "ingest-disagreement-7",
+          "detail": "Two current collectors disagree about whether ingestion workers started during the gap."
+        }
+      ],
+      "read_deployments": [
+        {
+          "evidence_id": "ingest-disagreement-3",
+          "detail": "No effective worker or route settings survived for the affected interval."
+        }
+      ],
+      "read_health": [
+        {
+          "evidence_id": "ingest-disagreement-5",
+          "detail": "The most recent endpoint probe after recovery is healthy."
+        }
+      ]
+    }
+  }
+]

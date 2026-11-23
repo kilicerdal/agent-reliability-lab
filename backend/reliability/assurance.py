@@ -21,6 +21,12 @@ class SupportedDiagnosis(Diagnosis):
     claims: list[ClaimCitation] = Field(min_length=2, max_length=4)
 
 
+class CitationReview(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    claims: list[ClaimCitation] = Field(max_length=2)
+
+
 class EvidenceJudgment(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -30,11 +36,7 @@ class EvidenceJudgment(BaseModel):
     required_excerpt: str | None = Field(default=None, min_length=8)
 
 
-def grade_claims(diagnosis, expected_cause, trace, rubric):
-    """Judge exact quotations and independently labeled support, one claim at a time."""
-    if diagnosis is None:
-        return {"cause_correct": False, "passed": False, "claims": []}
-
+def observed_records(trace):
     observed = {}
     inconsistent = set()
     for event in trace:
@@ -46,7 +48,32 @@ def grade_claims(diagnosis, expected_cause, trace, rubric):
             if evidence_id in observed and observed[evidence_id] != detail:
                 inconsistent.add(evidence_id)
             observed[evidence_id] = detail
+    return observed, inconsistent
 
+
+def apply_citation_review(diagnosis, review, records):
+    if {claim.kind for claim in review.claims} != {"mechanism", "configuration"}:
+        return None
+    if any(
+        claim.quote not in records.get(claim.evidence_id, "") for claim in review.claims
+    ):
+        return None
+    return diagnosis.model_copy(
+        update={
+            "claims": review.claims,
+            "evidence_ids": list(
+                dict.fromkeys(claim.evidence_id for claim in review.claims)
+            ),
+        }
+    )
+
+
+def grade_claims(diagnosis, expected_cause, trace, rubric):
+    """Judge exact quotations and independently labeled support, one claim at a time."""
+    if diagnosis is None:
+        return {"cause_correct": False, "passed": False, "claims": []}
+
+    observed, inconsistent = observed_records(trace)
     citations = set(diagnosis.evidence_ids)
     reviewed = {(row.kind, row.evidence_id): row for row in rubric}
     claims = []

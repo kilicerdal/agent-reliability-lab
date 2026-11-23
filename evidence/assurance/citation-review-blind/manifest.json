@@ -1,0 +1,25 @@
+{
+  "suite": {
+    "cases": 20,
+    "protocol_sha256": "69146228ba947f60e55a489bf755555f3ad473444ef39b8c33fa5ab425f4d3eb",
+    "observations_sha256": "1702ffd32625f77835ae35cb0bb5c5af1873ffc3b964eadf29712a65d5a9edde",
+    "answer_key_sha256": "aa3f6d2a6d254aea97bc71f8a3fefc2884e57b532e93aeeed9d4ce00f52b762d"
+  },
+  "repeats": 1,
+  "workers": 4,
+  "citation_review": true,
+  "rates_per_million": {
+    "gpt-6.2-sol": [
+      2,
+      10
+    ],
+    "gpt-6-luna": [
+      0.1,
+      0.5
+    ]
+  },
+  "limits": {
+    "elapsed_seconds": 25.0,
+    "estimated_usd": 0.03
+  }
+}

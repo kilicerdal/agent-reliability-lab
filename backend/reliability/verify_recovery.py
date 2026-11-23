@@ -23,6 +23,11 @@ def verify(folder):
         "estimated_usd": COST_LIMIT,
     }
     assert set(manifest["suite"]) == SCENARIOS.keys()
+    prompts = (
+        ("check-support", "verify-citations")
+        if manifest.get("citation_review")
+        else ("basic-citations", "check-support")
+    )
     coverage = Counter(
         (row["incident"], row["repeat"], row["model"], row["prompt"]) for row in rows
     )
@@ -31,7 +36,7 @@ def verify(folder):
         for incident in SCENARIOS
         for repeat in range(1, manifest["repeats"] + 1)
         for model in RATES
-        for prompt in ("basic-citations", "check-support")
+        for prompt in prompts
     )
     for row in rows:
         assert row["expected"] == SCENARIOS[row["incident"]][1]
@@ -41,9 +46,25 @@ def verify(folder):
             else None
         )
         rubric = [EvidenceJudgment.model_validate(entry) for entry in row["rubric"]]
-        assert row["verdict"] == grade_claims(
-            diagnosis, row["expected"], row["trace"], rubric
-        )
+        verdict = grade_claims(diagnosis, row["expected"], row["trace"], rubric)
+        if row["prompt"] == "verify-citations":
+            original = row["original_diagnosis"]
+            assert (original is None) == (diagnosis is None)
+            if original:
+                assert original["cause"] == diagnosis.cause
+            review_events = [
+                event
+                for event in row["trace"]
+                if event.get("phase") == "citation_review"
+            ]
+            assert len(review_events) <= 1
+            assert all(event["type"] == "model" for event in review_events)
+            if row["citation_review"] == "accepted":
+                assert original and len(review_events) == 1
+            else:
+                verdict["passed"] = False
+                assert original == row["diagnosis"]
+        assert row["verdict"] == verdict
         rates = RATES[row["model"]]
         for event in row["trace"]:
             if event["type"] == "model":
