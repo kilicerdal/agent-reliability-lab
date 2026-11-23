@@ -2,7 +2,9 @@ import json
 
 import pytest
 
+from backend.reliability import recovery_benchmark
 from backend.reliability.assurance import (
+    CitationReview,
     ClaimCitation,
     EvidenceJudgment,
     SupportedDiagnosis,
@@ -28,6 +30,63 @@ def diagnosis():
             ClaimCitation(kind="configuration", evidence_id="obs-2", quote=CONFIG),
         ],
     )
+
+
+@pytest.mark.parametrize("valid_review", [True, False])
+def test_benchmark_review_preserves_cause_and_fails_closed(monkeypatch, valid_review):
+    original = diagnosis()
+    original.claims[0] = ClaimCitation(
+        kind="mechanism", evidence_id="obs-2", quote=CONFIG
+    )
+    corrected = diagnosis()
+    rubric = [
+        EvidenceJudgment(
+            kind=claim.kind, evidence_id=claim.evidence_id, verdict="supports"
+        )
+        for claim in corrected.claims
+    ]
+    calls = []
+
+    def fake_investigate(payload, dispatch, client, budget, **options):
+        calls.append(options)
+        if len(calls) == 1:
+            options["trace"].append(
+                {
+                    "type": "tool",
+                    "ok": True,
+                    "result": {
+                        "records": [
+                            {"evidence_id": "obs-1", "detail": WORKLOAD},
+                            {"evidence_id": "obs-2", "detail": CONFIG},
+                        ]
+                    },
+                }
+            )
+            return original, [], {}
+        assert options["tools"] == []
+        assert set(json.loads(payload)) == {"cause", "claims", "observations"}
+        assert options["deadline"] == calls[0]["deadline"]
+        assert calls[0]["max_requests"] == 6
+        assert options["max_requests"] == 1
+        claims = (
+            corrected.claims
+            if valid_review
+            else [
+                corrected.claims[0].model_copy(update={"quote": "Invented quotation"}),
+                corrected.claims[1],
+            ]
+        )
+        return CitationReview(claims=claims), [], {}
+
+    monkeypatch.setattr(recovery_benchmark, "investigate", fake_investigate)
+    monkeypatch.setattr(recovery_benchmark, "Budget", lambda **kwargs: object())
+    row = recovery_benchmark.run_once(
+        None, "gpt-6-luna", "verify-citations", "Alert", None, "db_latency", rubric
+    )
+    assert row["verdict"]["cause_correct"]
+    assert row["verdict"]["passed"] is valid_review
+    assert row["citation_review"] == ("accepted" if valid_review else "rejected")
+    assert row["original_diagnosis"]["claims"][0]["evidence_id"] == "obs-2"
 
 
 def test_citation_support_rejects_observed_but_inadequate_evidence():

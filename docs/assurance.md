@@ -30,6 +30,12 @@ python -m backend.reliability.verify_recovery evidence/assurance/live-recovery
 
 The first command uses the authorized key and the isolated application services. The second verifies the captured coverage, grades, observed timeout markers, cost estimates, and summary offline.
 
+### Citation review experiment
+
+Run `python -m backend.reliability.recovery_benchmark --citation-review --output .private/recovery-citation-review` to compare the existing support prompt with a second, tool-free citation review for both models. Both arms allow up to six investigation requests. The review can make one additional request within the same deadline. The review sees the proposed cause, original claims, and observed records. It can replace citations or reject the evidence, and the application checks that both replacement quotes appear in the observed records. The scoring rubric stays separate.
+
+The report counts cause accuracy and supported diagnoses separately. Rejected or unavailable reviews count against citation support even when the first diagnosis chose the correct cause. The traces retain the original diagnosis and include review usage in timing and cost. The published recovery comparison below predates this experiment.
+
 ## Database-scoped approval
 
 A trusted launcher provisions a PostgreSQL login scoped to exactly one experiment and passes only that connection to the MCP subprocess. PostgreSQL policies use the authenticated session identity for order, observation, and approval-request rows. The old shared MCP role is a group without login privileges. Worker restart requests bind the operation and experiment, and the operator's update still checks the request's age, eligibility, and prior use within one transaction.
@@ -52,3 +58,22 @@ The 16 timeout trials exercised eight actual delayed HTTP reads and eight Postgr
 These results describe four author-created, synthetic incidents with two repetitions per configuration. They support retaining Sol for this evidence requirement and testing on an independently authored suite before generalizing. Estimated API usage for the comparison was $0.218170.
 
 [Comparison summary](../evidence/assurance/live-recovery/summary.json) · [32 recorded traces](../evidence/assurance/live-recovery/runs.jsonl) · [Frozen runtime manifest](../evidence/assurance/live-recovery/manifest.json)
+
+### Recorded citation review results
+
+Both runs used four synthetic recovery incidents, two repetitions per configuration, and separate rubric scoring. The baseline retains the existing single-pass support prompt. The review arm adds a second call to check citations against observed evidence.
+
+| Request budget | Model | Second pass | Supported | Correct cause | Median time | Estimated API cost for 8 runs |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| Six total | Sol | Off | 8/8 | 8/8 | 7.38 s | $0.094264 |
+| Six total | Sol | On | 8/8 | 8/8 | 9.31 s | $0.110696 |
+| Six total | Luna | Off | 6/8 | 8/8 | 6.49 s | $0.005785 |
+| Six total | Luna | On | 4/8 | 4/8 | 6.32 s | $0.005217 |
+| Six for investigation | Sol | Off | 8/8 | 8/8 | 7.48 s | $0.100556 |
+| Six for investigation | Sol | On | 8/8 | 8/8 | 9.05 s | $0.111108 |
+| Six for investigation | Luna | Off | 4/8 | 8/8 | 6.36 s | $0.005818 |
+| Six for investigation | Luna | On | 7/8 | 8/8 | 8.51 s | $0.006502 |
+
+The fixed-cap arm reserved one of its six calls for review. Luna exhausted its five investigation calls in four trials and returned no diagnosis. The matched-budget arm allowed one additional review call. In that arm the reviewer repaired one of Luna's initial citation failures and rejected one initially supported diagnosis. The separate baseline generated different initial diagnoses, so the 4/8 to 7/8 difference includes variation between model runs. The two benchmark runs partly overlapped, and the latency figures describe those conditions. Combined estimated usage was $0.439946.
+
+[Fixed-cap report](../evidence/assurance/citation-review-fixed-cap/summary.json) · [Fixed-cap traces](../evidence/assurance/citation-review-fixed-cap/runs.jsonl) · [Matched-budget report](../evidence/assurance/citation-review-matched-budget/summary.json) · [Matched-budget traces](../evidence/assurance/citation-review-matched-budget/runs.jsonl)
