@@ -3,6 +3,8 @@ WORKDIR /app
 COPY dashboard/package*.json ./
 RUN npm ci
 COPY dashboard/ ./
+COPY evidence/ /app/evidence/
+ENV LAB_EVIDENCE_DIR=/app/evidence
 ARG LAB_API_URL=http://api:8810
 ENV LAB_API_URL=$LAB_API_URL NEXT_TELEMETRY_DISABLED=1
 RUN npm run build

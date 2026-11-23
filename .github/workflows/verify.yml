@@ -45,7 +45,7 @@ jobs:
       - name: Offline and real database tests — no model calls
         run: pytest -q
       - run: npm --prefix dashboard ci
-      - run: npx prettier --check app next.config.ts playwright.config.ts tests package.json tsconfig.json
+      - run: npx prettier --check app "!app/showcase/recorded-data.json" scripts/recordings.mjs next.config.ts playwright.config.ts playwright.public.config.ts tests package.json tsconfig.json
         working-directory: dashboard
       - run: npm --prefix dashboard run build
       - name: Start recorded viewer
@@ -56,6 +56,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
         working-directory: dashboard
       - run: npm run test:browser
+        working-directory: dashboard
+      - run: npm run build:public && npm run test:public
         working-directory: dashboard
       - uses: actions/upload-artifact@v4
         if: always()

@@ -1,0 +1,49 @@
+name: Publish recorded viewer
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - uses: actions/configure-pages@v5
+        id: pages
+      - run: npm ci
+        working-directory: dashboard
+      - run: npm run build:public
+        working-directory: dashboard
+        env:
+          NEXT_PUBLIC_LAB_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_TELEMETRY_DISABLED: '1'
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dashboard/out
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy viewer
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -9,3 +9,7 @@ node_modules/
 .next/
 artifacts/
 test-results/
+
+/dashboard/public/recordings/
+/dashboard/out/
+/dashboard/app/showcase/recorded-data.json
