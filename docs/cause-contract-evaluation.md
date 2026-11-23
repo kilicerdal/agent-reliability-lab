@@ -50,4 +50,4 @@ python -m backend.reliability.verify --fixtures backend/reliability/mixed-signal
 
 The control's failed Spurious Stock Warning trial repeated the original failure pattern. It correctly cited a 700 ms SQL delay and healthy inventory, yet returned `dependency_config`. The candidate returned `db_latency` in all three repetitions. The recovery rates have different denominators because the two prompts sometimes chose different tools. Overall diagnosis uses the same planned denominator.
 
-Across both comparisons, the 84 investigations used 357 API requests and an estimated $0.722290. The candidate remains opt-in. Its one-run gain on six fresh, hand-authored fixtures is a narrow result and supports a larger blind evaluation before adoption.
+Across both comparisons, the 84 investigations used 357 API requests and an estimated $0.722290. The one-run gain on six fresh, hand-authored fixtures motivated the [larger blind evaluation](blind-cause-evaluation.md).

@@ -40,6 +40,8 @@ jobs:
         run: |
           python -m backend.reliability.verify --evidence evidence/cause-contract
           python -m backend.reliability.verify --fixtures backend/reliability/mixed-signals.json --evidence evidence/cause-contract-mixed
+          python -m backend.reliability.paired_report --fixtures backend/reliability/blind-cause-fixtures.json --evidence evidence/cause-contract-blind --output "${RUNNER_TEMP}/blind-paired.json"
+          cmp "${RUNNER_TEMP}/blind-paired.json" evidence/cause-contract-blind/paired.json
       - run: python -m backend.controls.verify
       - name: Start synthetic inventory
         run: |

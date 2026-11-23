@@ -85,7 +85,7 @@ Only synthetic alert text, tool schemas and synthetic tool observations are sent
 For Docker, set `OPENAI_API_KEY` in your shell first, then:
 
 ```bash
-mkdir -p .private evidence/runs
+mkdir -p .private
 docker compose run --rm -e OPENAI_API_KEY runner python -m lab.run database-slowdown
 ```
 
@@ -96,6 +96,8 @@ PYTHONPATH=backend .venv/bin/python -m lab.run database-slowdown
 # Explicitly run all four development cases:
 scripts/evaluate.sh
 ```
+
+New investigations use the cause-label contract by default and write captures to `.private/live-runs` unless `LAB_RESULTS_DIR` is set. The [blind comparison](docs/blind-cause-evaluation.md) measured 50/50 grounded diagnoses with the contract and 47/50 with the previous recovery prompt.
 
 The CLI also accepts `--env-file /path/to/an/existing/ignored/env-file`; the key stays server-side and is not copied into the project. Neither CI nor the browser tests make paid model calls.
 

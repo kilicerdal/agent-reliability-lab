@@ -32,7 +32,7 @@ def investigate(
     trace,
     tools=TOOLS,
     instructions=PROMPT,
-    cause_contract=False,
+    cause_contract=True,
 ):
     schema = Diagnosis.model_json_schema()
     if cause_contract:
