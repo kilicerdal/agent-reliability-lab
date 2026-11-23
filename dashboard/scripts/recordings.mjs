@@ -29,6 +29,9 @@ for (const [source, name] of [
   ["v3/prompt-trials.jsonl", "v3-prompt-trials.jsonl"],
   ["cause-contract-blind/paired.json", "blind-scorecard.json"],
   ["cause-contract-blind/runs.jsonl", "blind-traces.jsonl"],
+  ["assurance/live-recovery/summary.json", "model-comparison.json"],
+  ["assurance/live-recovery/runs.jsonl", "model-comparison-traces.jsonl"],
+  ["assurance/database-boundary.json", "scoped-approval.json"],
 ]) {
   await copyFile(join(evidence, source), join(destination, name));
 }
@@ -160,6 +163,78 @@ if (
   );
 }
 const blind = { byCause, corrections };
+const recoverySummary = JSON.parse(
+  await readFile(
+    join(evidence, "assurance/live-recovery/summary.json"),
+    "utf8",
+  ),
+);
+const recoveryRuns = (
+  await readFile(join(evidence, "assurance/live-recovery/runs.jsonl"), "utf8")
+)
+  .trim()
+  .split("\n")
+  .map((line) => JSON.parse(line));
+const recoveryArms = Object.entries(recoverySummary).map(([key, totals]) => {
+  const [model, prompt] = key.split("/");
+  const rows = recoveryRuns.filter(
+    (run) => run.model === model && run.prompt === prompt,
+  );
+  if (
+    rows.length !== totals.runs ||
+    rows.filter((run) => run.verdict.cause_correct).length !==
+      totals.correct_cause ||
+    rows.filter((run) => run.verdict.passed).length !== totals.supported
+  ) {
+    throw new Error(
+      `Live recovery scorecard does not match the traces: ${key}`,
+    );
+  }
+  return { model, prompt, ...totals };
+});
+if (
+  recoveryArms.reduce((total, arm) => total + arm.runs, 0) !==
+  recoveryRuns.length
+) {
+  throw new Error("Live recovery scorecard omits recorded runs");
+}
+const mismatch = recoveryRuns.find(
+  (row) =>
+    row.model === "gpt-6-luna" &&
+    row.prompt === "check-support" &&
+    row.verdict.cause_correct &&
+    !row.verdict.passed &&
+    row.verdict.claims.some((claim) => claim.verdict === "irrelevant"),
+);
+const counterpart =
+  mismatch &&
+  recoveryRuns.find(
+    (row) =>
+      row.model === "gpt-6.2-sol" &&
+      row.prompt === mismatch.prompt &&
+      row.incident === mismatch.incident &&
+      row.repeat === mismatch.repeat &&
+      row.verdict.passed,
+  );
+if (!counterpart)
+  throw new Error(
+    "The recovery comparison requires a matched citation example",
+  );
+const example = ({ model, diagnosis, verdict }) => ({
+  model,
+  cause: diagnosis.cause,
+  claims: verdict.claims,
+});
+const recoveryComparison = {
+  arms: recoveryArms,
+  cases: new Set(recoveryRuns.map((row) => row.incident)).size,
+  example: {
+    incident: mismatch.incident,
+    repeat: mismatch.repeat,
+    supporting: example(counterpart),
+    insufficient: example(mismatch),
+  },
+};
 await writeFile(
   resolve("app/showcase/recorded-data.json"),
   JSON.stringify({
@@ -169,5 +244,6 @@ await writeFile(
     failures,
     approval,
     blind,
+    recoveryComparison,
   }),
 );

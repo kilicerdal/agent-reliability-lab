@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import styles from "./showcase.module.css";
+import ModelComparison, { type RecoveryComparison } from "./model-comparison";
 
 type RecordItem = {
   evidence_id: string;
@@ -369,6 +370,7 @@ export default function Showcase({
   failures,
   approval,
   blind,
+  recoveryComparison,
 }: {
   investigations: Investigation[];
   comparison: Comparison;
@@ -376,6 +378,7 @@ export default function Showcase({
   failures: Failure[];
   approval: Approval;
   blind: BlindEvaluation;
+  recoveryComparison: RecoveryComparison;
 }) {
   const [scenario, setScenario] = useState("worker-failure");
   const [stage, setStage] = useState(0);
@@ -419,6 +422,7 @@ export default function Showcase({
             <a href="#investigation">Investigation</a>
             <a href="#comparison">Evaluation</a>
             <a href="#blind-evaluation">Blind evaluation</a>
+            <a href="#model-comparison">Model comparison</a>
             <a href="#approval">Approval</a>
           </nav>
         </div>
@@ -685,6 +689,7 @@ export default function Showcase({
           </div>
         </section>
         <BlindComparison blind={blind} />
+        <ModelComparison comparison={recoveryComparison} />
         <section
           id="approval"
           className={styles.section}
@@ -829,6 +834,24 @@ export default function Showcase({
               href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/blind-traces.jsonl`}
             >
               Blind trials · JSONL ↓
+            </a>
+            <a
+              download
+              href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/model-comparison.json`}
+            >
+              Model comparison · JSON ↓
+            </a>
+            <a
+              download
+              href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/model-comparison-traces.jsonl`}
+            >
+              Recovery traces · JSONL ↓
+            </a>
+            <a
+              download
+              href={`${process.env.NEXT_PUBLIC_LAB_BASE_PATH || ""}/recordings/scoped-approval.json`}
+            >
+              Database approval evidence · JSON ↓
             </a>
           </div>
           <p>
