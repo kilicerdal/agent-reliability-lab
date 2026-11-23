@@ -2,10 +2,10 @@
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import anyio
@@ -15,19 +15,22 @@ from mcp import Client, StdioServerParameters
 from backend.lab.db import connect
 from backend.lab.sandbox import fingerprint, record, reproduce, tick
 
-from .approval import approve_restart, install
+from .approval import approve_restart, install, scoped_mcp_dsn
 from .server import REQUEST
 
 
-def mcp_client(experiment):
-    return Client(
-        StdioServerParameters(
-            command=sys.executable,
-            args=["-m", "backend.controls.server", experiment],
-            env={"LAB_MCP_DSN": os.environ["LAB_MCP_DSN"]},
-        ),
-        read_timeout_seconds=15,
-    )
+@asynccontextmanager
+async def mcp_client(experiment):
+    with scoped_mcp_dsn(experiment) as dsn:
+        async with Client(
+            StdioServerParameters(
+                command=sys.executable,
+                args=["-m", "backend.controls.server", experiment],
+                env={"LAB_MCP_DSN": dsn},
+            ),
+            read_timeout_seconds=15,
+        ) as client:
+            yield client
 
 
 def state(experiment):
@@ -55,10 +58,10 @@ def operator_cli(experiment, answer):
     )
 
 
-def sqlstate(statement, experiment):
+def sqlstate(dsn, statement, experiment):
     try:
         with (
-            psycopg.connect(os.environ["LAB_MCP_DSN"], connect_timeout=5) as conn,
+            psycopg.connect(dsn, connect_timeout=5) as conn,
             conn.transaction(force_rollback=True),
         ):
             conn.execute(statement, (experiment,))
@@ -94,15 +97,29 @@ async def capture():
         requested = await client.call_tool(REQUEST, {})
         repeated = await client.call_tool(REQUEST, {})
     pending = state(target)
-    denied_sql = {
-        "update_worker": sqlstate(
-            "UPDATE experiments SET worker_enabled=true WHERE id=%s", target
-        ),
-        "forge_approval": sqlstate(
-            "UPDATE worker_restart_requests SET approved_at=now() WHERE experiment=%s",
-            target,
-        ),
-    }
+    with scoped_mcp_dsn(target) as dsn:
+        denied_sql = {
+            "update_worker": sqlstate(
+                dsn, "UPDATE experiments SET worker_enabled=true WHERE id=%s", target
+            ),
+            "forge_approval": sqlstate(
+                dsn,
+                "UPDATE worker_restart_requests SET approved_at=now() WHERE experiment=%s",
+                target,
+            ),
+            "cross_experiment_request": sqlstate(
+                dsn,
+                "INSERT INTO worker_restart_requests (experiment) VALUES (%s)",
+                other,
+            ),
+        }
+        with psycopg.connect(dsn, connect_timeout=5) as conn:
+            database_scope = {
+                table: conn.execute(
+                    f"SELECT DISTINCT experiment FROM {table}"
+                ).fetchall()
+                for table in ("orders", "observations", "worker_restart_requests")
+            }
     wrong_confirmation = operator_cli(target, other)
     still_pending = state(target)
 
@@ -139,6 +156,9 @@ async def capture():
         "scope_enforced": "LAB_OTHER_EXPERIMENT"
         not in json.dumps(logs.structured_content)
         and all(denied.values()),
+        "database_identity_scoped": all(
+            rows == [(target,)] for rows in database_scope.values()
+        ),
         "no_write_privilege": set(denied_sql.values()) == {"42501"},
         "no_approval_without_request": before_request == "no_request",
         "request_retry_idempotent": requested.structured_content
@@ -167,6 +187,7 @@ async def capture():
         "tools": [tool.name for tool in catalog.tools],
         "denied_mcp_calls": denied,
         "denied_database_sqlstates": denied_sql,
+        "database_scope": database_scope,
         "approvals_without_request": before_request,
         "requested": requested.structured_content,
         "request_retry": repeated.structured_content,

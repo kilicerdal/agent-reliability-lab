@@ -15,7 +15,8 @@ class BudgetExceeded(RuntimeError):
 
 
 class Budget:
-    def __init__(self, path=None):
+    def __init__(self, path=None, *, rates=(2, 10)):
+        self.rates = rates
         self.path = Path(
             path or os.environ.get("LAB_BUDGET_FILE", ".private/budget.sqlite")
         )
@@ -45,7 +46,8 @@ class Budget:
 
     def settle(self, rid, input_tokens, output_tokens):
         # Standard, uncached upper estimate. Cached inputs may make the actual invoice lower.
-        amount = (input_tokens * 2 + output_tokens * 10) / 1_000_000
+        input_rate, output_rate = self.rates
+        amount = (input_tokens * input_rate + output_tokens * output_rate) / 1_000_000
         if amount > RESERVE:
             raise BudgetExceeded(
                 "Usage exceeded request reservation: stop and review pricing"

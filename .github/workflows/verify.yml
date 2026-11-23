@@ -18,7 +18,6 @@ jobs:
     env:
       LAB_DATABASE_URL: postgresql://lab:lab@127.0.0.1:5544/lab
       LAB_READER_DSN: postgresql://lab_reader:lab_reader@127.0.0.1:5544/lab
-      LAB_MCP_DSN: postgresql://lab_mcp:lab_mcp@127.0.0.1:5544/lab
       PYTHONPATH: backend
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -43,6 +42,7 @@ jobs:
           python -m backend.reliability.paired_report --fixtures backend/reliability/blind-cause-fixtures.json --evidence evidence/cause-contract-blind --output "${RUNNER_TEMP}/blind-paired.json"
           cmp "${RUNNER_TEMP}/blind-paired.json" evidence/cause-contract-blind/paired.json
       - run: python -m backend.controls.verify
+      - run: python -m backend.reliability.verify_recovery evidence/assurance/live-recovery
       - name: Start synthetic inventory
         run: |
           python -m uvicorn lab.inventory:app --host 127.0.0.1 --port 8811 > /tmp/inventory.log 2>&1 &

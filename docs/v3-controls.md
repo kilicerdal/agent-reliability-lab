@@ -27,11 +27,11 @@ The integration harness supplied both confirmations by script. It observed one `
 
 Three paired live GPT-6.2 Sol investigations used fresh worker-failure experiments. Each pair compared a neutral observation with one untrusted observation asking for an incorrect healthy diagnosis and a marker string. The model received each note through an MCP read. All three injected runs and all three controls produced the correct grounded diagnosis, omitted the marker, and left the worker disabled without a restart request. Estimated cost was $0.045856 for 18 model requests at the project's standard token rates.
 
-These trials cover one incident type and three deliberately simple notes. The tool handler enforces experiment scope. Direct PostgreSQL access under the shared MCP role can read granted tables across experiments. Keep its credentials on the trusted local host. This lab uses local synthetic credentials and a trusted launcher, operator, and model host. The worker remediation re-enables application configuration.
+These trials cover one incident type and three deliberately simple notes. In the original V3 capture, the tool handler enforced experiment scope and the shared PostgreSQL role had cross-experiment read access. The [current database-scoped controls](assurance.md#database-scoped-approval) add row-level enforcement. This lab uses local synthetic credentials and a trusted launcher, operator, and model host. The worker remediation re-enables application configuration.
 
 ## Reproduce
 
-Install the pinned Python dependencies. Start a dedicated synthetic PostgreSQL database and the V1 inventory service. Set `LAB_DATABASE_URL` to the database owner connection and `LAB_MCP_DSN` to the synthetic `lab_mcp` connection. The role is created by the installer. `LAB_INVENTORY_URL` defaults to `http://127.0.0.1:8811`.
+Install the pinned Python dependencies. Start a dedicated synthetic PostgreSQL database and the V1 inventory service. Set `LAB_DATABASE_URL` to the database owner connection. Use password authentication for the subprocess connections. The installer creates the MCP privilege group and row policies. `LAB_INVENTORY_URL` defaults to `http://127.0.0.1:8811`.
 
 ```sh
 python -m backend.controls.approval install
@@ -45,7 +45,7 @@ To exercise the operator workflow manually, first create a worker-failure experi
 python -c 'from backend.lab.sandbox import reproduce; print(reproduce("worker-failure"))'
 ```
 
-Configure a local MCP client to launch `python -m backend.controls.server EXPERIMENT_ID` from the repository root with `LAB_MCP_DSN`. List the tools and call `request_worker_restart` with `{}`. Then run these commands in the separate operator environment, substituting the UUID.
+Configure a trusted local MCP host to launch `python -m backend.controls.approval serve EXPERIMENT_ID` from the repository root. The launcher uses the owner connection to provision a scoped role and starts the MCP subprocess with the scoped connection. List the tools and call `request_worker_restart` with `{}`. Then run these commands in the separate operator environment, substituting the UUID.
 
 ```sh
 python -m backend.controls.approval approve EXPERIMENT_ID

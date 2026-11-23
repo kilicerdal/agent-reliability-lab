@@ -19,6 +19,8 @@ Built by **Erdal Kilic** with AI assistance for implementation, tests and docume
 
 [Full desktop capture](docs/assets/dashboard-1440.png) · [Mobile capture](docs/assets/dashboard-390.png)
 
+**Agent assurance:** inspect the [citation grader, independent benchmark intake, real recovery comparisons, and database-scoped approval](docs/assurance.md).
+
 ## Reviewer journey — five minutes
 
 1. Start the recorded viewer below. No API key is needed to inspect the included captures.
