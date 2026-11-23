@@ -13,6 +13,8 @@ Built by **Erdal Kilic** with AI assistance for implementation, tests and docume
 
 **V3 controls:** The local MCP tools are bound to one experiment. A separate operator confirmation enabled the worker once across concurrent retries, and the order completed once. [Read the V3 report](docs/v3-controls.md) · [Inspect the evidence](evidence/v3/)
 
+**V4 evidence viewer:** Explore the investigation, compare held-out results, and replay recorded approval state in one static site. [Open the live viewer](https://kilicerdal.github.io/agent-reliability-lab/) · [Build and preview locally](docs/v4-viewer.md)
+
 ![Working V1 dashboard showing captured investigations and independent outcomes](docs/assets/overview.png)
 
 [Full desktop capture](docs/assets/dashboard-1440.png) · [Mobile capture](docs/assets/dashboard-390.png)

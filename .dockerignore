@@ -6,3 +6,7 @@
 .env*
 artifacts
 test-results
+
+dashboard/out
+dashboard/public/recordings
+dashboard/app/showcase/recorded-data.json
